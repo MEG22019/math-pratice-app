@@ -13,6 +13,7 @@ import {
   initializeStorage,
   loadActiveSession,
   loadAttempts,
+  loadMistakePatterns,
   loadSessions,
   loadSettings,
   MAX_STORED_SESSIONS,
@@ -21,6 +22,7 @@ import {
   sanitizeSettings,
   saveActiveSession,
   saveCompletedSession,
+  saveMistakePatterns,
   saveSettings,
   STORAGE_VERSION,
   storageKeys,
@@ -163,6 +165,29 @@ describe('history persistence', () => {
     expect(loadSessions()).toEqual([])
     expect(loadAttempts()).toEqual([])
     expect(localStorage.getItem(storageKeys.activeSession)).toBeNull()
+  })
+
+  it('persists valid mistake patterns and filters malformed records', () => {
+    const validPattern = {
+      id: 'mistake-1',
+      operation: 'subtraction' as const,
+      firstOperand: 9,
+      secondOperand: 4,
+      correctAnswer: 5,
+      difficulty: 2 as const,
+      incorrectCount: 2,
+      similarCorrectCount: 1,
+      lastIncorrectAt: '2026-01-01T00:00:00.000Z',
+      isMastered: false,
+    }
+
+    expect(saveMistakePatterns([validPattern])).toBe(true)
+    expect(loadMistakePatterns()).toEqual([validPattern])
+    localStorage.setItem(
+      storageKeys.mistakePatterns,
+      JSON.stringify([validPattern, { id: 'bad' }]),
+    )
+    expect(loadMistakePatterns()).toEqual([validPattern])
   })
 })
 

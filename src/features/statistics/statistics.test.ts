@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { PracticeAttempt } from '../../types'
+import type { MistakePattern, PracticeAttempt } from '../../types'
 import { calculateAccuracy, calculateStatistics } from './statistics'
 
 function attempt(
@@ -59,5 +59,48 @@ describe('statistics calculations', () => {
       incorrect: 1,
     })
     expect(statistics.byOperation.multiplication.attempted).toBe(0)
+  })
+
+  it('calculates active, mastered, and review statistics', () => {
+    const patterns: MistakePattern[] = [
+      {
+        id: 'active',
+        operation: 'addition',
+        firstOperand: 2,
+        secondOperand: 3,
+        correctAnswer: 5,
+        difficulty: 1,
+        incorrectCount: 2,
+        similarCorrectCount: 1,
+        lastIncorrectAt: '2026-01-01T00:00:00.000Z',
+        isMastered: false,
+      },
+      {
+        id: 'mastered',
+        operation: 'division',
+        firstOperand: 8,
+        secondOperand: 2,
+        correctAnswer: 4,
+        difficulty: 2,
+        incorrectCount: 1,
+        similarCorrectCount: 3,
+        lastIncorrectAt: '2026-01-02T00:00:00.000Z',
+        isMastered: true,
+      },
+    ]
+    const statistics = calculateStatistics(
+      [
+        attempt({ id: '1', source: 'mistake-review' }),
+        attempt({ id: '2', source: 'mistake-review', isCorrect: false }),
+      ],
+      patterns,
+    )
+
+    expect(statistics.mistakes).toEqual({
+      activePatterns: 1,
+      masteredPatterns: 1,
+      similarQuestionsPracticed: 2,
+      correctReviewAnswers: 1,
+    })
   })
 })

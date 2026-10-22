@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
 import { AppRoutes } from '../components/App'
-import { saveCompletedSession } from '../services/storage'
+import { saveCompletedSession, saveMistakePatterns } from '../services/storage'
 import type { PracticeSession } from '../types'
 
 function createSession(): PracticeSession {
@@ -97,5 +97,35 @@ describe('SessionSummaryPage', () => {
     expect(
       within(card!).getByRole('link', { name: 'Start Practice' }),
     ).toHaveAttribute('href', '/practice/setup')
+  })
+
+  it('starts mistake practice when an active saved pattern exists', async () => {
+    const user = userEvent.setup()
+    saveCompletedSession(createSession())
+    saveMistakePatterns([
+      {
+        id: 'mistake-1',
+        operation: 'addition',
+        firstOperand: 4,
+        secondOperand: 5,
+        correctAnswer: 9,
+        difficulty: 1,
+        incorrectCount: 2,
+        similarCorrectCount: 0,
+        lastIncorrectAt: '2026-01-01T00:00:00.000Z',
+        isMastered: false,
+      },
+    ])
+    renderSummary()
+
+    const practiceMistakes = screen.getByRole('button', {
+      name: 'Practice Mistakes',
+    })
+    expect(practiceMistakes).toBeEnabled()
+    await user.click(practiceMistakes)
+
+    expect(
+      screen.getByRole('heading', { name: 'Question 1 of 10' }),
+    ).toBeInTheDocument()
   })
 })

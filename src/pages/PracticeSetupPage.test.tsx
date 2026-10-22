@@ -7,6 +7,7 @@ import { AppRoutes } from '../components/App'
 import {
   defaultSettings,
   loadSettings,
+  saveMistakePatterns,
   saveSettings,
 } from '../services/storage'
 
@@ -107,5 +108,35 @@ describe('Practice Setup', () => {
     expect(
       screen.getByRole('radio', { name: /20.*Power practice/i }),
     ).toBeChecked()
+  })
+
+  it('enables mistake review for active saved patterns and hides chosen skill controls', async () => {
+    const user = userEvent.setup()
+    saveMistakePatterns([
+      {
+        id: 'mistake-1',
+        operation: 'division',
+        firstOperand: 12,
+        secondOperand: 3,
+        correctAnswer: 4,
+        difficulty: 2,
+        incorrectCount: 2,
+        similarCorrectCount: 0,
+        lastIncorrectAt: '2026-01-01T00:00:00.000Z',
+        isMastered: false,
+      },
+    ])
+    renderSetup()
+
+    const reviewMode = screen.getByRole('radio', {
+      name: /Practice Mistakes/i,
+    })
+    expect(reviewMode).toBeEnabled()
+    await user.click(reviewMode)
+    expect(
+      screen.queryByText('What would you like to practice?'),
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Start Session/i }))
+    expect(screen.getByText(/Division · Easy/)).toBeInTheDocument()
   })
 })

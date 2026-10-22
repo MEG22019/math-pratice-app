@@ -396,115 +396,115 @@
 
 ### 51. Record Mistake Patterns
 
-- [ ] Create a mistake pattern after an incorrect regular-practice answer.
-- [ ] Store operation, operands, answer, and difficulty.
-- [ ] Track incorrect count.
-- [ ] Track last incorrect date.
-- [ ] Avoid duplicate patterns for the same fact.
+- [x] Create a mistake pattern after an incorrect regular-practice answer.
+- [x] Store operation, operands, answer, and difficulty.
+- [x] Track incorrect count.
+- [x] Track last incorrect date.
+- [x] Avoid duplicate patterns for the same fact.
 
 ### 52. Update Existing Patterns
 
-- [ ] Increment incorrect count after repeated misses.
-- [ ] Reset mastery progress after a new mistake when appropriate.
-- [ ] Reactivate a mastered pattern after it is missed again.
+- [x] Increment incorrect count after repeated misses.
+- [x] Reset mastery progress after a new mistake when appropriate.
+- [x] Reactivate a mastered pattern after it is missed again.
 
 ### 53. Persist Mistake Patterns
 
-- [ ] Save patterns to localStorage.
-- [ ] Validate loaded mistake patterns.
-- [ ] Load active mistake patterns when needed.
-- [ ] Add tests for creation, update, and persistence.
+- [x] Save patterns to localStorage.
+- [x] Validate loaded mistake patterns.
+- [x] Load active mistake patterns when needed.
+- [x] Add tests for creation, update, and persistence.
 
 ## Phase 13: Similar Question Generation
 
 ### 54. Define Similarity Rules
 
-- [ ] Keep the same operation.
-- [ ] Stay near the original difficulty.
-- [ ] Vary operands while preserving the practiced concept.
-- [ ] Keep all generated questions valid.
+- [x] Keep the same operation.
+- [x] Stay near the original difficulty.
+- [x] Vary operands while preserving the practiced concept.
+- [x] Keep all generated questions valid.
 
 ### 55. Generate Similar Questions
 
-- [ ] Generate from a saved mistake pattern.
-- [ ] Attach the source mistake-pattern ID.
-- [ ] Tag the question as `mistake-review`.
-- [ ] Avoid endlessly repeating the exact same question.
+- [x] Generate from a saved mistake pattern.
+- [x] Attach the source mistake-pattern ID.
+- [x] Tag the question as `mistake-review`.
+- [x] Avoid endlessly repeating the exact same question.
 
 ### 56. Validate Similar Questions
 
-- [ ] Reuse standard question validation.
-- [ ] Provide a safe fallback when generation fails.
-- [ ] Add unit tests.
+- [x] Reuse standard question validation.
+- [x] Provide a safe fallback when generation fails.
+- [x] Add unit tests.
 
 ### 57. Prepare Review Integration
 
-- [ ] Make similar-question generation callable from a review session.
-- [ ] Preserve mastery-tracking information.
+- [x] Make similar-question generation callable from a review session.
+- [x] Preserve mastery-tracking information.
 
 ## Phase 14: Mistake Review Mode
 
 ### 58. Add Review Mode to Practice Setup
 
-- [ ] Add a regular-practice option.
-- [ ] Add a mistake-review option.
-- [ ] Disable mistake review when no active mistakes exist.
-- [ ] Explain why review is unavailable when appropriate.
-- [ ] Hide operation/difficulty selectors in mistake-review mode when the review patterns determine them.
+- [x] Add a regular-practice option.
+- [x] Add a mistake-review option.
+- [x] Disable mistake review when no active mistakes exist.
+- [x] Explain why review is unavailable when appropriate.
+- [x] Hide operation/difficulty selectors in mistake-review mode when the review patterns determine them.
 
 ### 59. Prioritize Mistake Patterns
 
-- [ ] Prioritize patterns with higher incorrect counts.
-- [ ] Consider how recently the pattern was missed.
-- [ ] Consider lower mastery progress.
-- [ ] Add a tiebreaker for equally ranked patterns.
+- [x] Prioritize patterns with higher incorrect counts.
+- [x] Consider how recently the pattern was missed.
+- [x] Consider lower mastery progress.
+- [x] Add a tiebreaker for equally ranked patterns.
 
 ### 60. Build Mistake Review Sessions
 
-- [ ] Select active mistake patterns.
-- [ ] Generate similar questions from prioritized patterns.
-- [ ] Tag review questions correctly.
-- [ ] Support normal session tracking and summary behavior.
+- [x] Select active mistake patterns.
+- [x] Generate similar questions from prioritized patterns.
+- [x] Tag review questions correctly.
+- [x] Support normal session tracking and summary behavior.
 
 ### 61. Track Similar-Question Results
 
-- [ ] Increment similar-correct count after a correct review result.
-- [ ] Reset mastery progress after an incorrect review result.
-- [ ] Update incorrect count when appropriate.
-- [ ] Persist pattern updates.
+- [x] Increment similar-correct count after a correct review result.
+- [x] Reset mastery progress after an incorrect review result.
+- [x] Update incorrect count when appropriate.
+- [x] Persist pattern updates.
 
 ### 62. Apply Mastery Rules
 
-- [ ] Use the configured mastery threshold.
-- [ ] Mark a pattern mastered when the threshold is reached.
-- [ ] Exclude mastered patterns from active review.
-- [ ] Reactivate a mastered pattern if it is missed again.
+- [x] Use the configured mastery threshold.
+- [x] Mark a pattern mastered when the threshold is reached.
+- [x] Exclude mastered patterns from active review.
+- [x] Reactivate a mastered pattern if it is missed again.
 
 ## Phase 15: Advanced Statistics
 
 ### 63. Add Mistake Statistics
 
-- [ ] Display active mistake patterns.
-- [ ] Display mastered mistake patterns.
-- [ ] Display number of similar questions practiced.
-- [ ] Display correct mistake-review answers.
+- [x] Display active mistake patterns.
+- [x] Display mastered mistake patterns.
+- [x] Display number of similar questions practiced.
+- [x] Display correct mistake-review answers.
 
 ### 64. Add Frequently Missed Areas
 
-- [ ] Calculate the most missed operation.
-- [ ] Support ties.
-- [ ] Display most missed number facts.
-- [ ] Sort facts by incorrect count.
-- [ ] Add a useful empty state.
+- [x] Calculate the most missed operation.
+- [x] Support ties.
+- [x] Display most missed number facts.
+- [x] Sort facts by incorrect count.
+- [x] Add a useful empty state.
 
 ### 65. Add Mistake Details
 
-- [ ] Add Active and Mastered views/tabs.
-- [ ] Display the missed fact.
-- [ ] Display incorrect count.
-- [ ] Display mastery progress.
-- [ ] Display the last incorrect date.
-- [ ] Allow mastered patterns to be viewed separately.
+- [x] Add Active and Mastered views/tabs.
+- [x] Display the missed fact.
+- [x] Display incorrect count.
+- [x] Display mastery progress.
+- [x] Display the last incorrect date.
+- [x] Allow mastered patterns to be viewed separately.
 
 ## Phase 16: Accessibility
 
@@ -625,9 +625,9 @@
 - [ ] Test distractor generation.
 - [ ] Test answer uniqueness.
 - [x] Test statistics calculations.
-- [ ] Test mistake pattern behavior.
-- [ ] Test similar-question generation.
-- [ ] Test mastery rules.
+- [x] Test mistake pattern behavior.
+- [x] Test similar-question generation.
+- [x] Test mastery rules.
 - [ ] Test storage serialization and validation.
 
 ### 80. Complete Component Tests
@@ -647,9 +647,9 @@
 - [ ] Test a full addition session.
 - [ ] Test a mixed-operation session.
 - [ ] Test continuous practice.
-- [ ] Test an incorrect answer creating a mistake pattern.
-- [ ] Test mistake-review generation.
-- [ ] Test mastery completion.
+- [x] Test an incorrect answer creating a mistake pattern.
+- [x] Test mistake-review generation.
+- [x] Test mastery completion.
 - [ ] Test persistence after a browser refresh.
 - [x] Test resetting statistics.
 

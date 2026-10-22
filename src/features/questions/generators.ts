@@ -1,6 +1,7 @@
 import type {
   DifficultyLevel,
   MathOperation,
+  MistakePattern,
   Question,
   QuestionSource,
 } from '../../types'
@@ -15,11 +16,66 @@ import {
 } from './difficultyRules'
 import { validateQuestion } from './validation'
 
-interface GeneratorOptions {
+export interface GeneratorOptions {
   idFactory?: () => string
   mistakePatternId?: string
   random?: RandomSource
   source?: QuestionSource
+}
+
+export function generateSimilarQuestion(
+  pattern: MistakePattern,
+  options: GeneratorOptions = {},
+): Question {
+  const random = options.random ?? Math.random
+  const candidates: Question[] = []
+  const reviewOptions: GeneratorOptions = {
+    ...options,
+    mistakePatternId: pattern.id,
+    source: 'mistake-review',
+  }
+
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const candidate = generateQuestion(
+      pattern.operation,
+      pattern.difficulty,
+      reviewOptions,
+    )
+    if (
+      candidate.firstOperand !== pattern.firstOperand ||
+      candidate.secondOperand !== pattern.secondOperand
+    ) {
+      candidates.push(candidate)
+    }
+  }
+
+  if (candidates.length > 0) {
+    return candidates.sort(
+      (first, second) =>
+        Math.abs(first.firstOperand - pattern.firstOperand) +
+        Math.abs(first.secondOperand - pattern.secondOperand) -
+        (Math.abs(second.firstOperand - pattern.firstOperand) +
+          Math.abs(second.secondOperand - pattern.secondOperand)),
+    )[0]
+  }
+
+  for (const fallbackRandom of [0.15, 0.35, 0.65, 0.85]) {
+    const candidate = generateQuestion(pattern.operation, pattern.difficulty, {
+      ...reviewOptions,
+      random: () => fallbackRandom,
+    })
+    if (
+      candidate.firstOperand !== pattern.firstOperand ||
+      candidate.secondOperand !== pattern.secondOperand
+    ) {
+      return candidate
+    }
+  }
+
+  return generateQuestion(pattern.operation, pattern.difficulty, {
+    ...reviewOptions,
+    random,
+  })
 }
 
 type OperationGenerator = (

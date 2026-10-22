@@ -1,5 +1,6 @@
 import type {
   ApplicationStatistics,
+  MistakePattern,
   PracticeAttempt,
   StatisticsTotals,
 } from '../../types'
@@ -22,6 +23,7 @@ export function calculateAccuracy(totals: StatisticsTotals): number {
 
 export function calculateStatistics(
   attempts: PracticeAttempt[],
+  patterns: MistakePattern[] = [],
 ): ApplicationStatistics {
   const statistics: ApplicationStatistics = {
     ...emptyTotals(),
@@ -38,10 +40,14 @@ export function calculateStatistics(
       4: emptyTotals(),
     },
     mistakes: {
-      activePatterns: 0,
-      masteredPatterns: 0,
-      similarQuestionsPracticed: 0,
-      correctReviewAnswers: 0,
+      activePatterns: patterns.filter((pattern) => !pattern.isMastered).length,
+      masteredPatterns: patterns.filter((pattern) => pattern.isMastered).length,
+      similarQuestionsPracticed: attempts.filter(
+        (attempt) => attempt.source === 'mistake-review',
+      ).length,
+      correctReviewAnswers: attempts.filter(
+        (attempt) => attempt.source === 'mistake-review' && attempt.isCorrect,
+      ).length,
     },
   }
 

@@ -10,6 +10,7 @@ import {
   loadSessions,
   loadSettings,
   saveCompletedSession,
+  saveMistakePatterns,
   saveSettings,
 } from '../services/storage'
 import type { PracticeAttempt, PracticeSession } from '../types'
@@ -141,5 +142,59 @@ describe('StatisticsPage', () => {
     expect(
       screen.getByRole('heading', { name: 'Your progress starts here' }),
     ).toBeInTheDocument()
+  })
+
+  it('shows mistake totals, frequent areas, and active/mastered views', async () => {
+    const user = userEvent.setup()
+    saveCompletedSession(
+      createSession(
+        'session',
+        '2026-02-01T12:00:00.000Z',
+        'division',
+        2,
+        false,
+      ),
+    )
+    saveMistakePatterns([
+      {
+        id: 'active',
+        operation: 'division',
+        firstOperand: 12,
+        secondOperand: 3,
+        correctAnswer: 4,
+        difficulty: 2,
+        incorrectCount: 4,
+        similarCorrectCount: 1,
+        lastIncorrectAt: '2026-02-01T12:00:00.000Z',
+        isMastered: false,
+      },
+      {
+        id: 'mastered',
+        operation: 'addition',
+        firstOperand: 5,
+        secondOperand: 5,
+        correctAnswer: 10,
+        difficulty: 1,
+        incorrectCount: 2,
+        similarCorrectCount: 3,
+        lastIncorrectAt: '2026-01-01T12:00:00.000Z',
+        isMastered: true,
+      },
+    ])
+    renderStatistics()
+
+    expect(
+      screen.getByRole('heading', { name: 'Mistake progress' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Most-missed operations')).toBeInTheDocument()
+    const details = screen
+      .getByRole('group', { name: 'Mistake views' })
+      .closest('.mistake-details') as HTMLElement
+    expect(within(details).getByText('12 ÷ 3 = 4')).toBeInTheDocument()
+    expect(within(details).queryByText('5 + 5 = 10')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Mastered (1)' }))
+    expect(within(details).getByText('5 + 5 = 10')).toBeInTheDocument()
+    expect(within(details).queryByText('12 ÷ 3 = 4')).not.toBeInTheDocument()
   })
 })

@@ -3,7 +3,16 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import { PageContainer } from '../components/layout/PageContainer'
 import { Button, ButtonLink } from '../components/ui/Button'
-import { loadLastSummarySessionId, loadSession } from '../services/storage'
+import {
+  createMistakeReviewConfiguration,
+  getActiveMistakePatterns,
+} from '../features/mistakes/mistakes'
+import {
+  loadLastSummarySessionId,
+  loadMistakePatterns,
+  loadSession,
+  loadSettings,
+} from '../services/storage'
 import type { PracticeSetupConfiguration } from '../types'
 
 interface SummaryLocationState {
@@ -32,6 +41,12 @@ export function SessionSummaryPage() {
     const resolvedSessionId = sessionId ?? loadLastSummarySessionId()
     return resolvedSessionId ? loadSession(resolvedSessionId) : undefined
   })
+  const [reviewConfiguration] = useState(() =>
+    createMistakeReviewConfiguration(
+      getActiveMistakePatterns(loadMistakePatterns()),
+      loadSettings(),
+    ),
+  )
 
   if (!session) {
     return (
@@ -62,6 +77,17 @@ export function SessionSummaryPage() {
       : `${session.sessionLength} questions`
 
   function practiceAgain() {
+    if (session!.mode === 'mistake-review') {
+      if (reviewConfiguration) {
+        navigate('/practice/session', {
+          state: { configuration: reviewConfiguration },
+        })
+      } else {
+        navigate('/practice/setup')
+      }
+      return
+    }
+
     const configuration: PracticeSetupConfiguration = {
       operations: [...session!.operations],
       difficulty: session!.difficulty,
@@ -70,6 +96,14 @@ export function SessionSummaryPage() {
     }
 
     navigate('/practice/session', { state: { configuration } })
+  }
+
+  function practiceMistakes() {
+    if (reviewConfiguration) {
+      navigate('/practice/session', {
+        state: { configuration: reviewConfiguration },
+      })
+    }
   }
 
   return (
@@ -141,7 +175,12 @@ export function SessionSummaryPage() {
             Practice Again
           </Button>
           <div className="summary-actions__grid">
-            <Button disabled type="button" variant="secondary">
+            <Button
+              disabled={!reviewConfiguration}
+              type="button"
+              variant="secondary"
+              onClick={practiceMistakes}
+            >
               Practice Mistakes
             </Button>
             <ButtonLink to="/practice/setup" variant="secondary">
@@ -154,7 +193,11 @@ export function SessionSummaryPage() {
               Return Home
             </ButtonLink>
           </div>
-          <p>Practice Mistakes unlocks when mistake patterns are available.</p>
+          <p>
+            {reviewConfiguration
+              ? 'Practice Mistakes is ready with your saved skills.'
+              : 'Practice Mistakes unlocks when mistake patterns are available.'}
+          </p>
         </div>
       </section>
     </PageContainer>

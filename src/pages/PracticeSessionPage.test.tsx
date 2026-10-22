@@ -4,8 +4,13 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
 import { AppRoutes } from '../components/App'
-import { defaultSettings, saveSettings } from '../services/storage'
-import type { PracticeSetupConfiguration } from '../types'
+import {
+  defaultSettings,
+  loadMistakePatterns,
+  saveMistakePatterns,
+  saveSettings,
+} from '../services/storage'
+import type { MistakePattern, PracticeSetupConfiguration } from '../types'
 
 function renderSession(configuration: PracticeSetupConfiguration) {
   return render(
@@ -136,5 +141,64 @@ describe('PracticeSessionPage', () => {
     expect(screen.queryByText(/ equals /)).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'I Got It Right' }))
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('records an incorrect regular-practice question as a saved mistake', async () => {
+    const user = userEvent.setup()
+    renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 'continuous',
+      mode: 'regular',
+    })
+
+    await user.click(screen.getAllByRole('button', { name: /^Answer / })[0])
+    await user.click(screen.getByRole('button', { name: 'Check My Answer' }))
+    await user.click(screen.getByRole('button', { name: 'I Got It Wrong' }))
+
+    expect(loadMistakePatterns()).toHaveLength(1)
+    expect(loadMistakePatterns()[0]).toMatchObject({
+      incorrectCount: 1,
+      similarCorrectCount: 0,
+      isMastered: false,
+    })
+  })
+
+  it('runs mistake review and completes when the last pattern is mastered', async () => {
+    const user = userEvent.setup()
+    const mistake: MistakePattern = {
+      id: 'mistake-1',
+      operation: 'addition',
+      firstOperand: 3,
+      secondOperand: 4,
+      correctAnswer: 7,
+      difficulty: 1,
+      incorrectCount: 2,
+      similarCorrectCount: 0,
+      lastIncorrectAt: '2026-01-01T00:00:00.000Z',
+      isMastered: false,
+    }
+    saveMistakePatterns([mistake])
+    saveSettings({ ...defaultSettings, mistakeMasteryThreshold: 1 })
+    renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 10,
+      mode: 'mistake-review',
+    })
+
+    expect(screen.getByText(/Addition · Beginner/)).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: /^Answer / })[0])
+    await user.click(screen.getByRole('button', { name: 'Check My Answer' }))
+    await user.click(screen.getByRole('button', { name: 'I Got It Right' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'Session Summary' }),
+    ).toBeInTheDocument()
+    expect(loadMistakePatterns()[0]).toMatchObject({
+      similarCorrectCount: 1,
+      isMastered: true,
+    })
+    expect(screen.getByText('Mistake review')).toBeInTheDocument()
   })
 })

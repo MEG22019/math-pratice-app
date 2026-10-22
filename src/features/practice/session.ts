@@ -17,6 +17,7 @@ interface SessionDependencies {
   createAttemptId?: () => string
   createQuestion?: typeof generateQuestion
   createSessionId?: () => string
+  hasReviewQuestions?: () => boolean
   now?: () => string
 }
 
@@ -95,7 +96,10 @@ export function recordPracticeResult(
     incorrectCount: session.incorrectCount + (isCorrect ? 0 : 1),
     attempts: [...session.attempts, attempt],
   }
-  const isComplete = isFixedSessionComplete(updatedSession)
+  const isComplete =
+    isFixedSessionComplete(updatedSession) ||
+    (updatedSession.mode === 'mistake-review' &&
+      dependencies.hasReviewQuestions?.() === false)
 
   if (isComplete) {
     updatedSession.completedAt = now()

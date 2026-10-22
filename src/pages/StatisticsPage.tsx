@@ -7,7 +7,14 @@ import {
   calculateStatistics,
 } from '../features/statistics/statistics'
 import {
+  formatMistakeFact,
+  getFrequentlyMissedFacts,
+  getFrequentlyMissedOperations,
+} from '../features/mistakes/mistakes'
+import {
   loadAttempts,
+  loadMistakePatterns,
+  loadSettings,
   loadSessions,
   resetPracticeHistory,
 } from '../services/storage'
@@ -71,6 +78,7 @@ function formatSessionDate(session: PracticeSession): string {
 }
 
 export function StatisticsPage() {
+  const [settings] = useState(loadSettings)
   const [attempts, setAttempts] = useState(loadAttempts)
   const [sessions, setSessions] = useState(() =>
     loadSessions()
@@ -81,7 +89,14 @@ export function StatisticsPage() {
       )
       .slice(0, 10),
   )
-  const statistics = useMemo(() => calculateStatistics(attempts), [attempts])
+  const [mistakePatterns, setMistakePatterns] = useState(loadMistakePatterns)
+  const [mistakeView, setMistakeView] = useState<'active' | 'mastered'>(
+    'active',
+  )
+  const statistics = useMemo(
+    () => calculateStatistics(attempts, mistakePatterns),
+    [attempts, mistakePatterns],
+  )
 
   function resetStatistics() {
     const confirmed = window.confirm(
@@ -91,11 +106,17 @@ export function StatisticsPage() {
     if (confirmed && resetPracticeHistory()) {
       setAttempts([])
       setSessions([])
+      setMistakePatterns([])
     }
   }
 
   const operations = Object.keys(operationLabels) as MathOperation[]
   const difficulties = [1, 2, 3, 4] as DifficultyLevel[]
+  const frequentOperations = getFrequentlyMissedOperations(mistakePatterns)
+  const frequentFacts = getFrequentlyMissedFacts(mistakePatterns)
+  const visiblePatterns = mistakePatterns.filter(
+    (pattern) => pattern.isMastered === (mistakeView === 'mastered'),
+  )
 
   return (
     <PageContainer className="statistics-page">
@@ -211,6 +232,126 @@ export function StatisticsPage() {
                   </article>
                 )
               })}
+            </div>
+          </section>
+
+          <section aria-labelledby="mistakes-heading">
+            <h2 id="mistakes-heading" className="section-title">
+              Mistake progress
+            </h2>
+            <div className="mistake-overview">
+              <dl className="stat-card__metrics">
+                <div>
+                  <dt>Active skills</dt>
+                  <dd>{statistics.mistakes.activePatterns}</dd>
+                </div>
+                <div>
+                  <dt>Mastered skills</dt>
+                  <dd>{statistics.mistakes.masteredPatterns}</dd>
+                </div>
+                <div>
+                  <dt>Review questions</dt>
+                  <dd>{statistics.mistakes.similarQuestionsPracticed}</dd>
+                </div>
+                <div>
+                  <dt>Review correct</dt>
+                  <dd>{statistics.mistakes.correctReviewAnswers}</dd>
+                </div>
+              </dl>
+              <div className="frequent-areas">
+                <div>
+                  <h3>Most-missed operations</h3>
+                  <p>
+                    {frequentOperations.length > 0
+                      ? frequentOperations
+                          .map((operation) => operationLabels[operation])
+                          .join(', ')
+                      : 'No missed operations yet'}
+                  </p>
+                </div>
+                <div>
+                  <h3>Frequently missed facts</h3>
+                  {frequentFacts.length > 0 ? (
+                    <ol>
+                      {frequentFacts.map((pattern) => (
+                        <li key={pattern.id}>
+                          <strong>{formatMistakeFact(pattern)}</strong>
+                          <span>
+                            {pattern.incorrectCount}{' '}
+                            {pattern.incorrectCount === 1 ? 'miss' : 'misses'}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p>No missed facts yet—keep practicing!</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mistake-details">
+              <div
+                className="mistake-tabs"
+                role="group"
+                aria-label="Mistake views"
+              >
+                <Button
+                  type="button"
+                  variant={mistakeView === 'active' ? 'primary' : 'secondary'}
+                  onClick={() => setMistakeView('active')}
+                >
+                  Active ({statistics.mistakes.activePatterns})
+                </Button>
+                <Button
+                  type="button"
+                  variant={mistakeView === 'mastered' ? 'primary' : 'secondary'}
+                  onClick={() => setMistakeView('mastered')}
+                >
+                  Mastered ({statistics.mistakes.masteredPatterns})
+                </Button>
+              </div>
+              {visiblePatterns.length === 0 ? (
+                <p className="mistake-list-empty">
+                  No {mistakeView} mistake patterns to show.
+                </p>
+              ) : (
+                <div className="mistake-list">
+                  {visiblePatterns.map((pattern) => (
+                    <article key={pattern.id} className="mistake-item">
+                      <div>
+                        <h3>{formatMistakeFact(pattern)}</h3>
+                        <p>
+                          {operationLabels[pattern.operation]} ·{' '}
+                          {difficultyLabels[pattern.difficulty]}
+                        </p>
+                      </div>
+                      <dl>
+                        <div>
+                          <dt>Misses</dt>
+                          <dd>{pattern.incorrectCount}</dd>
+                        </div>
+                        <div>
+                          <dt>Mastery progress</dt>
+                          <dd>
+                            {pattern.similarCorrectCount} /{' '}
+                            {settings.mistakeMasteryThreshold}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Last missed</dt>
+                          <dd>
+                            {new Intl.DateTimeFormat(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                            }).format(new Date(pattern.lastIncorrectAt))}
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 

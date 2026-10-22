@@ -1448,6 +1448,175 @@ main {
   margin-top: 2rem;
 }
 
+.practice-mode-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.practice-mode {
+  display: grid;
+  position: relative;
+  min-height: 9rem;
+  align-content: center;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  border: 0.14rem solid var(--line);
+  border-radius: 1.25rem;
+  background: #f8fcfe;
+  cursor: pointer;
+  text-align: center;
+}
+
+.practice-mode:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.practice-mode--selected {
+  border-color: var(--blue);
+  background: #eaf7ff;
+  box-shadow: 0 0.3rem 0 #a6d5ee;
+}
+
+.practice-mode input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.practice-mode > span {
+  font-size: 2rem;
+}
+
+.practice-mode strong {
+  font-family: ui-rounded, 'Arial Rounded MT Bold', system-ui, sans-serif;
+  font-size: 1.1rem;
+}
+
+.practice-mode small {
+  color: #607589;
+}
+
+.mistake-overview,
+.mistake-details {
+  padding: 1.25rem;
+  border: 0.1rem solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--white);
+  box-shadow: 0 0.6rem 1.8rem rgb(24 49 83 / 8%);
+}
+
+.frequent-areas {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.frequent-areas > div {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #f8fcfe;
+}
+
+.frequent-areas h3,
+.frequent-areas p {
+  margin: 0;
+}
+
+.frequent-areas p {
+  margin-top: 0.4rem;
+  color: #52677e;
+}
+
+.frequent-areas ol {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.75rem 0 0;
+  padding-left: 1.5rem;
+}
+
+.frequent-areas li {
+  padding-left: 0.2rem;
+}
+
+.frequent-areas li span {
+  margin-left: 0.5rem;
+  color: #607589;
+  font-size: 0.85rem;
+}
+
+.mistake-details {
+  margin-top: 1rem;
+}
+
+.mistake-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.mistake-tabs .button {
+  min-height: 2.75rem;
+}
+
+.mistake-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mistake-item {
+  display: grid;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 0.1rem solid var(--line);
+  border-radius: 1rem;
+  grid-template-columns: minmax(10rem, 1fr) minmax(20rem, 1.4fr);
+}
+
+.mistake-item h3,
+.mistake-item p {
+  margin: 0;
+}
+
+.mistake-item p {
+  margin-top: 0.25rem;
+  color: #607589;
+}
+
+.mistake-item dl {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.mistake-item dt {
+  color: #607589;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mistake-item dd {
+  margin: 0.2rem 0 0;
+  font-weight: 700;
+}
+
+.mistake-list-empty {
+  margin: 0;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: #f3f9fc;
+  color: #52677e;
+  text-align: center;
+}
+
 .settings-panel,
 .settings-defaults {
   margin: 0;
@@ -1608,6 +1777,10 @@ main {
   .recent-session {
     grid-template-columns: 1fr;
   }
+
+  .mistake-item {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 42rem) {
@@ -1675,6 +1848,11 @@ main {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .practice-mode-grid,
+  .frequent-areas {
+    grid-template-columns: 1fr;
+  }
+
   .choice-grid--difficulty {
     grid-template-columns: 1fr;
   }
@@ -1736,7 +1914,8 @@ main {
   }
 
   .stat-card__metrics,
-  .recent-session dl {
+  .recent-session dl,
+  .mistake-item dl {
     grid-template-columns: repeat(2, 1fr);
   }
 

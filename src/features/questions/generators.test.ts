@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import type { DifficultyLevel, MathOperation, Question } from '../../types'
+import type {
+  DifficultyLevel,
+  MathOperation,
+  MistakePattern,
+  Question,
+} from '../../types'
 import {
   additionRules,
   divisionRules,
@@ -8,6 +13,7 @@ import {
   generateDivisionQuestion,
   generateMultiplicationQuestion,
   generateQuestion,
+  generateSimilarQuestion,
   generateSubtractionQuestion,
   multiplicationRules,
   subtractionRules,
@@ -187,6 +193,70 @@ describe('main question generator', () => {
 
     expect(question.operation).toBe('addition')
     expect(validateQuestion(question)).toBe(true)
+  })
+})
+
+describe('similar question generation', () => {
+  it.each(operations)(
+    'creates a valid, varied %s review question linked to its pattern',
+    (operation) => {
+      const original = generateQuestion(operation, 2)
+      const pattern: MistakePattern = {
+        id: `mistake-${operation}`,
+        operation,
+        firstOperand: original.firstOperand,
+        secondOperand: original.secondOperand,
+        correctAnswer: original.correctAnswer,
+        difficulty: 2,
+        incorrectCount: 1,
+        similarCorrectCount: 0,
+        lastIncorrectAt: '2026-01-01T00:00:00.000Z',
+        isMastered: false,
+      }
+      let randomValue = 0.07
+      const similar = generateSimilarQuestion(pattern, {
+        random: () => {
+          randomValue = (randomValue + 0.173) % 1
+          return randomValue
+        },
+      })
+
+      expect(similar).toMatchObject({
+        operation,
+        difficulty: 2,
+        source: 'mistake-review',
+        mistakePatternId: pattern.id,
+      })
+      expect([similar.firstOperand, similar.secondOperand]).not.toEqual([
+        pattern.firstOperand,
+        pattern.secondOperand,
+      ])
+      expect(validateQuestion(similar)).toBe(true)
+    },
+  )
+
+  it('uses a safe varied fallback when random generation repeats the fact', () => {
+    const original = generateQuestion('addition', 2, { random: () => 0.5 })
+    const pattern: MistakePattern = {
+      id: 'mistake-repeat',
+      operation: 'addition',
+      firstOperand: original.firstOperand,
+      secondOperand: original.secondOperand,
+      correctAnswer: original.correctAnswer,
+      difficulty: 2,
+      incorrectCount: 1,
+      similarCorrectCount: 0,
+      lastIncorrectAt: '2026-01-01T00:00:00.000Z',
+      isMastered: false,
+    }
+
+    const similar = generateSimilarQuestion(pattern, { random: () => 0.5 })
+
+    expect([similar.firstOperand, similar.secondOperand]).not.toEqual([
+      pattern.firstOperand,
+      pattern.secondOperand,
+    ])
+    expect(validateQuestion(similar)).toBe(true)
   })
 })
 

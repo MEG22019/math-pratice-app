@@ -11,13 +11,24 @@ import {
   recordPracticeResult,
 } from '../features/practice/session'
 import {
+  getActiveMistakePatterns,
+  prioritizeMistakePatterns,
+  recordQuestionOutcome,
+} from '../features/mistakes/mistakes'
+import {
+  generateQuestion,
+  generateSimilarQuestion,
+} from '../features/questions'
+import { getEncouragingMessage, playResultSound } from '../services/feedback'
+import {
   clearActiveSession,
   loadActiveSession,
+  loadMistakePatterns,
   loadSettings,
   saveActiveSession,
   saveCompletedSession,
+  saveMistakePatterns,
 } from '../services/storage'
-import { getEncouragingMessage, playResultSound } from '../services/feedback'
 import type {
   ActiveSessionSnapshot,
   PracticeSetupConfiguration,
@@ -52,6 +63,31 @@ function ActivePracticeSession({
 }: ActivePracticeSessionProps) {
   const navigate = useNavigate()
   const [settings] = useState(loadSettings)
+  const sessionConfiguration = configuration ?? {
+    operations: restoredSnapshot!.session.operations,
+    difficulty: restoredSnapshot!.session.difficulty,
+    sessionLength: restoredSnapshot!.session.sessionLength,
+    mode: restoredSnapshot!.session.mode,
+  }
+  const createSessionQuestion = () => {
+    if (sessionConfiguration.mode === 'regular') {
+      return generateQuestion(
+        sessionConfiguration.operations,
+        sessionConfiguration.difficulty,
+      )
+    }
+
+    const pattern = prioritizeMistakePatterns(loadMistakePatterns())[0]
+    if (!pattern) {
+      throw new Error('No active mistake patterns are available.')
+    }
+    return generateSimilarQuestion(pattern)
+  }
+  const sessionDependencies = {
+    createQuestion: createSessionQuestion,
+    hasReviewQuestions: () =>
+      getActiveMistakePatterns(loadMistakePatterns()).length > 0,
+  }
   const [state, setState] = useState(() =>
     restoredSnapshot
       ? {
@@ -59,7 +95,7 @@ function ActivePracticeSession({
           currentQuestion: restoredSnapshot.currentQuestion,
           isComplete: false,
         }
-      : createPracticeSessionState(configuration!),
+      : createPracticeSessionState(sessionConfiguration, sessionDependencies),
   )
   const [cardState, setCardState] = useState<QuestionCardState>(() => ({
     selectedAnswer: restoredSnapshot?.selectedAnswer ?? null,
@@ -83,9 +119,21 @@ function ActivePracticeSession({
         ? getEncouragingMessage(isCorrect)
         : '',
     )
+    const updatedPatterns = recordQuestionOutcome(
+      loadMistakePatterns(),
+      currentQuestion,
+      isCorrect,
+      settings.mistakeMasteryThreshold,
+    )
+    saveMistakePatterns(updatedPatterns)
     setCardState({ selectedAnswer: null, isRevealed: false })
     setState((currentState) =>
-      recordPracticeResult(currentState, selectedAnswer, isCorrect),
+      recordPracticeResult(
+        currentState,
+        selectedAnswer,
+        isCorrect,
+        sessionDependencies,
+      ),
     )
   }
 
@@ -199,8 +247,12 @@ export function PracticeSessionPage() {
   const [restoredSnapshot] = useState(() =>
     configuration ? undefined : loadActiveSession(),
   )
+  const reviewIsUnavailable =
+    !restoredSnapshot &&
+    configuration?.mode === 'mistake-review' &&
+    getActiveMistakePatterns(loadMistakePatterns()).length === 0
 
-  if (!configuration && !restoredSnapshot) {
+  if ((!configuration && !restoredSnapshot) || reviewIsUnavailable) {
     return (
       <PageContainer className="placeholder-page">
         <section className="placeholder-card">
@@ -208,8 +260,16 @@ export function PracticeSessionPage() {
             🧭
           </div>
           <p className="eyebrow">Let’s get ready first</p>
-          <h1>No practice setup found</h1>
-          <p>Choose your practice options before starting a session.</p>
+          <h1>
+            {reviewIsUnavailable
+              ? 'No active mistakes to review'
+              : 'No practice setup found'}
+          </h1>
+          <p>
+            {reviewIsUnavailable
+              ? 'Great work! Try regular practice to discover more skills to strengthen.'
+              : 'Choose your practice options before starting a session.'}
+          </p>
           <ButtonLink to="/practice/setup">Go to Practice Setup</ButtonLink>
         </section>
       </PageContainer>

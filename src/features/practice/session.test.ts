@@ -147,4 +147,22 @@ describe('practice session state', () => {
       'subtraction',
     ])
   })
+
+  it('ends review early when no active mistake questions remain', () => {
+    const createQuestion = createQuestionFactory()
+    const state = createPracticeSessionState(
+      { ...fixedConfiguration, mode: 'mistake-review', sessionLength: 10 },
+      { createQuestion },
+    )
+    const completed = recordPracticeResult(state, 4, true, {
+      createQuestion,
+      hasReviewQuestions: () => false,
+      now: () => '2026-01-01T00:05:00.000Z',
+    })
+
+    expect(completed.isComplete).toBe(true)
+    expect(completed.session.attemptedCount).toBe(1)
+    expect(completed.session.completedAt).toBe('2026-01-01T00:05:00.000Z')
+    expect(createQuestion).toHaveBeenCalledTimes(1)
+  })
 })

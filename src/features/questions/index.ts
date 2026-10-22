@@ -10,6 +10,7 @@ export {
   generateDivisionQuestion,
   generateMultiplicationQuestion,
   generateQuestion,
+  generateSimilarQuestion,
   generateSubtractionQuestion,
 } from './generators'
 export { validateQuestion } from './validation'
