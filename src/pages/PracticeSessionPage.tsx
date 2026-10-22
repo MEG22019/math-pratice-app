@@ -19,6 +19,7 @@ import {
   generateQuestion,
   generateSimilarQuestion,
 } from '../features/questions'
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { getEncouragingMessage, playResultSound } from '../services/feedback'
 import {
   clearActiveSession,
@@ -62,6 +63,7 @@ function ActivePracticeSession({
   restoredSnapshot,
 }: ActivePracticeSessionProps) {
   const navigate = useNavigate()
+  const prefersReducedMotion = usePrefersReducedMotion()
   const [settings] = useState(loadSettings)
   const sessionConfiguration = configuration ?? {
     operations: restoredSnapshot!.session.operations,
@@ -205,7 +207,9 @@ function ActivePracticeSession({
 
       <div className="session-progress">
         {isContinuous ? (
-          <p>{session.attemptedCount} completed · Keep going!</p>
+          <p aria-atomic="true" aria-live="polite">
+            {session.attemptedCount} completed · Keep going!
+          </p>
         ) : (
           <>
             <div className="session-progress__labels">
@@ -214,6 +218,7 @@ function ActivePracticeSession({
             </div>
             <progress
               aria-label="Session progress"
+              aria-valuetext={`${session.attemptedCount} of ${session.sessionLength} questions completed`}
               max={progressMaximum}
               value={session.attemptedCount}
             />
@@ -221,8 +226,15 @@ function ActivePracticeSession({
         )}
       </div>
 
+      <p className="sr-only" aria-atomic="true" aria-live="polite">
+        Question {currentPosition}. {currentQuestion.displayText}. Choose from
+        four answers.
+      </p>
+
       <QuestionCard
-        animationsEnabled={settings.cardAnimationEnabled}
+        animationsEnabled={
+          settings.cardAnimationEnabled && !prefersReducedMotion
+        }
         initialIsRevealed={cardState.isRevealed}
         initialSelectedAnswer={cardState.selectedAnswer}
         key={currentQuestion.id}

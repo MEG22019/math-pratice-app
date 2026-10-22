@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { AppRoutes } from '../components/App'
 import {
@@ -11,6 +11,10 @@ import {
   saveSettings,
 } from '../services/storage'
 import type { MistakePattern, PracticeSetupConfiguration } from '../types'
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 function renderSession(configuration: PracticeSetupConfiguration) {
   return render(
@@ -33,6 +37,20 @@ function renderSessionRoute() {
       <AppRoutes />
     </MemoryRouter>,
   )
+}
+
+async function tabTo(
+  user: ReturnType<typeof userEvent.setup>,
+  element: HTMLElement,
+) {
+  for (let attempts = 0; attempts < 20; attempts += 1) {
+    if (document.activeElement === element) {
+      return
+    }
+    await user.tab()
+  }
+
+  expect(element).toHaveFocus()
 }
 
 describe('PracticeSessionPage', () => {
@@ -61,6 +79,73 @@ describe('PracticeSessionPage', () => {
     ).toBeInTheDocument()
     expect(screen.getAllByText('5', { selector: 'dd' })).toHaveLength(2)
     expect(screen.getByText('100%')).toBeInTheDocument()
+  })
+
+  it('runs a complete session using only the keyboard', async () => {
+    const user = userEvent.setup()
+    renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 5,
+      mode: 'regular',
+    })
+
+    for (let questionNumber = 1; questionNumber <= 5; questionNumber += 1) {
+      await user.keyboard('1')
+      const checkButton = screen.getByRole('button', {
+        name: 'Check My Answer',
+      })
+      await tabTo(user, checkButton)
+      await user.keyboard('{Enter}')
+
+      const rightButton = screen.getByRole('button', {
+        name: 'I Got It Right',
+      })
+      await tabTo(user, rightButton)
+      await user.keyboard('{Enter}')
+    }
+
+    expect(
+      await screen.findByRole('heading', { name: 'Session Summary' }),
+    ).toBeInTheDocument()
+  })
+
+  it('announces question changes and exposes readable progress', () => {
+    renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 5,
+      mode: 'regular',
+    })
+
+    expect(
+      screen.getByText(/Question 1\..*Choose from four answers/),
+    ).toHaveAttribute('aria-live', 'polite')
+    expect(screen.getByRole('progressbar')).toHaveAttribute(
+      'aria-valuetext',
+      '0 of 5 questions completed',
+    )
+  })
+
+  it('disables card motion when the browser requests reduced motion', () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    )
+    const { container } = renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 5,
+      mode: 'regular',
+    })
+
+    expect(container.querySelector('.question-card')).toHaveClass(
+      'question-card--no-animation',
+    )
   })
 
   it('updates continuous progress and totals', async () => {

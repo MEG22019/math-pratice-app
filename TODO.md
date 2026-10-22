@@ -510,49 +510,49 @@
 
 ### 66. Improve Keyboard Navigation
 
-- [ ] Ensure every control is reachable with the keyboard.
-- [ ] Support Enter/Space on buttons.
-- [ ] Add optional 1–4 answer shortcuts.
-- [ ] Ignore shortcuts when typing in editable controls.
-- [ ] Add visible focus styles.
+- [x] Ensure every control is reachable with the keyboard.
+- [x] Support Enter/Space on buttons.
+- [x] Add optional 1–4 answer shortcuts.
+- [x] Ignore shortcuts when typing in editable controls.
+- [x] Add visible focus styles.
 
 ### 67. Improve Screen-Reader Support
 
-- [ ] Add meaningful ARIA labels.
-- [ ] Add live announcements for question changes.
-- [ ] Announce answer selection and revealed answers.
-- [ ] Make progress accessible.
-- [ ] Use semantic heading structure.
+- [x] Add meaningful ARIA labels.
+- [x] Add live announcements for question changes.
+- [x] Announce answer selection and revealed answers.
+- [x] Make progress accessible.
+- [x] Use semantic heading structure.
 
 ### 68. Support Reduced Motion
 
-- [ ] Detect `prefers-reduced-motion`.
-- [ ] Disable card animation when appropriate.
-- [ ] Keep state changes understandable without animation.
+- [x] Detect `prefers-reduced-motion`.
+- [x] Disable card animation when appropriate.
+- [x] Keep state changes understandable without animation.
 
 ### 69. Improve Visual Accessibility
 
-- [ ] Do not communicate state by color alone.
-- [ ] Add text/icons to selected/result states.
-- [ ] Use readable contrast.
-- [ ] Use relative typography.
-- [ ] Verify browser zoom.
+- [x] Do not communicate state by color alone.
+- [x] Add text/icons to selected/result states.
+- [x] Use readable contrast.
+- [x] Use relative typography.
+- [x] Verify browser zoom.
 
 ## Phase 17: Responsive Design and Polish
 
 ### 70. Optimize for Tablets
 
-- [ ] Use large touch targets.
-- [ ] Center and constrain practice cards.
-- [ ] Ensure navigation is easy to tap.
-- [ ] Verify landscape/tablet layouts.
+- [x] Use large touch targets.
+- [x] Center and constrain practice cards.
+- [x] Ensure navigation is easy to tap.
+- [x] Verify landscape/tablet layouts.
 
 ### 71. Optimize for Phones
 
-- [ ] Stack answer choices when necessary.
-- [ ] Prevent horizontal scrolling.
-- [ ] Simplify navigation for small screens.
-- [ ] Verify common phone widths.
+- [x] Stack answer choices when necessary.
+- [x] Prevent horizontal scrolling.
+- [x] Simplify navigation for small screens.
+- [x] Verify common phone widths.
 
 ### 72. Improve Statistics Layout
 
@@ -655,12 +655,12 @@
 
 ### 82. Complete Accessibility Testing
 
-- [ ] Complete a session using only the keyboard.
-- [ ] Test with screen-reader-friendly labels/tools.
-- [ ] Test reduced-motion mode.
-- [ ] Test browser zoom.
-- [ ] Run an automated accessibility checker.
-- [ ] Manually review reported issues.
+- [x] Complete a session using only the keyboard.
+- [x] Test with screen-reader-friendly labels/tools.
+- [x] Test reduced-motion mode.
+- [x] Test browser zoom.
+- [x] Run an automated accessibility checker.
+- [x] Manually review reported issues.
 
 ## Phase 21: Performance and Data Management
 

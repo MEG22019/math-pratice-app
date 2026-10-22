@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type { Question } from '../../types'
 import { Button } from '../ui/Button'
@@ -33,6 +33,39 @@ export function QuestionCard({
   const [isRevealed, setIsRevealed] = useState(initialIsRevealed)
   const [hasSubmitted, setHasSubmitted] = useState(false)
 
+  const selectAnswer = useCallback(
+    (choice: number) => {
+      setSelectedAnswer(choice)
+      onStateChange?.({ selectedAnswer: choice, isRevealed: false })
+    },
+    [onStateChange],
+  )
+
+  useEffect(() => {
+    function handleAnswerShortcut(event: KeyboardEvent) {
+      const target = event.target
+      if (
+        isRevealed ||
+        (target instanceof HTMLElement &&
+          (target.isContentEditable ||
+            target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT'))
+      ) {
+        return
+      }
+
+      const choiceIndex = Number(event.key) - 1
+      if (choiceIndex >= 0 && choiceIndex < question.choices.length) {
+        event.preventDefault()
+        selectAnswer(question.choices[choiceIndex])
+      }
+    }
+
+    window.addEventListener('keydown', handleAnswerShortcut)
+    return () => window.removeEventListener('keydown', handleAnswerShortcut)
+  }, [isRevealed, question.choices, selectAnswer])
+
   function submitResult(isCorrect: boolean) {
     if (selectedAnswer === null || hasSubmitted) {
       return
@@ -51,7 +84,11 @@ export function QuestionCard({
     .join(' ')
 
   return (
-    <section className={cardClasses} aria-labelledby="question-title">
+    <section
+      className={cardClasses}
+      aria-describedby="answer-shortcut-hint"
+      aria-labelledby="question-title"
+    >
       {!isRevealed ? (
         <div className="question-card__face question-card__front">
           <p className="question-card__eyebrow">Solve this one</p>
@@ -62,15 +99,13 @@ export function QuestionCard({
           <div className="answer-grid" aria-label="Answer choices" role="group">
             {question.choices.map((choice, index) => (
               <button
+                aria-keyshortcuts={`${index + 1}`}
                 aria-label={`Answer ${choice}`}
                 aria-pressed={selectedAnswer === choice}
                 className={`answer-choice${selectedAnswer === choice ? ' answer-choice--selected' : ''}`}
                 key={choice}
                 type="button"
-                onClick={() => {
-                  setSelectedAnswer(choice)
-                  onStateChange?.({ selectedAnswer: choice, isRevealed: false })
-                }}
+                onClick={() => selectAnswer(choice)}
               >
                 <span className="answer-choice__key" aria-hidden="true">
                   {index + 1}
@@ -82,6 +117,15 @@ export function QuestionCard({
               </button>
             ))}
           </div>
+
+          <p className="question-card__shortcut" id="answer-shortcut-hint">
+            Tip: press 1, 2, 3, or 4 to choose an answer.
+          </p>
+          <p className="sr-only" aria-atomic="true" aria-live="polite">
+            {selectedAnswer === null
+              ? 'No answer selected.'
+              : `Answer ${selectedAnswer} selected.`}
+          </p>
 
           <Button
             className="question-card__reveal"
@@ -99,10 +143,7 @@ export function QuestionCard({
           )}
         </div>
       ) : (
-        <div
-          className="question-card__face question-card__back"
-          aria-live="polite"
-        >
+        <div className="question-card__face question-card__back">
           <p className="question-card__eyebrow">Check your work</p>
           <h2 id="question-title" className="question-card__problem">
             {question.displayText} = {question.correctAnswer}
@@ -118,6 +159,10 @@ export function QuestionCard({
               <strong>{question.correctAnswer}</strong>
             </div>
           </div>
+          <p className="sr-only" aria-atomic="true" aria-live="polite">
+            Answer revealed. Your answer is {selectedAnswer}. The correct answer
+            is {question.correctAnswer}.
+          </p>
 
           {showExplanation && (
             <p className="question-explanation">

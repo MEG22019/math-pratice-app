@@ -83,4 +83,59 @@ describe('QuestionCard', () => {
     expect(container.firstChild).toHaveClass('question-card--no-animation')
     expect(container.firstChild).toHaveClass('question-card--revealed')
   })
+
+  it('supports 1–4 keyboard shortcuts and announces the selection', async () => {
+    const user = userEvent.setup()
+    render(<QuestionCard question={question} onResult={vi.fn()} />)
+
+    await user.keyboard('2')
+
+    const selectedChoice = screen.getByRole('button', { name: 'Answer 11' })
+    expect(selectedChoice).toHaveAttribute('aria-pressed', 'true')
+    expect(selectedChoice).toHaveAttribute('aria-keyshortcuts', '2')
+    expect(screen.getByText('Answer 11 selected.')).toBeInTheDocument()
+  })
+
+  it('ignores answer shortcuts while the student is typing', async () => {
+    const user = userEvent.setup()
+    render(
+      <>
+        <label>
+          Notes
+          <input />
+        </label>
+        <QuestionCard question={question} onResult={vi.fn()} />
+      </>,
+    )
+
+    const notes = screen.getByRole('textbox', { name: 'Notes' })
+    await user.click(notes)
+    await user.keyboard('3')
+
+    expect(notes).toHaveValue('3')
+    expect(screen.getByRole('button', { name: 'Answer 12' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+  })
+
+  it('keeps answer controls operable with native Enter and Space keys', async () => {
+    const user = userEvent.setup()
+    render(<QuestionCard question={question} onResult={vi.fn()} />)
+
+    await user.tab()
+    expect(screen.getByRole('button', { name: 'Answer 10' })).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(screen.getByRole('button', { name: 'Answer 10' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+
+    await user.tab()
+    await user.keyboard(' ')
+    expect(screen.getByRole('button', { name: 'Answer 11' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+  })
 })

@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 const navigationItems = [
   { label: 'Home', to: '/', icon: '⌂' },
@@ -8,6 +9,20 @@ const navigationItems = [
 ]
 
 export function AppShell() {
+  const location = useLocation()
+  const previousPath = useRef(location.pathname)
+  const routeName = location.pathname.startsWith('/practice/')
+    ? 'Practice'
+    : (navigationItems.find((item) => item.to === location.pathname)?.label ??
+      'Math Practice')
+
+  useEffect(() => {
+    if (previousPath.current !== location.pathname) {
+      document.getElementById('main-content')?.focus()
+      previousPath.current = location.pathname
+    }
+  }, [location.pathname])
+
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">
@@ -44,6 +59,9 @@ export function AppShell() {
       </header>
 
       <main id="main-content" tabIndex={-1}>
+        <p className="sr-only" aria-atomic="true" aria-live="polite">
+          {routeName} page loaded.
+        </p>
         <Outlet />
       </main>
 

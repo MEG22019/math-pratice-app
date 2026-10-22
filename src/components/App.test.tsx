@@ -42,6 +42,11 @@ describe('App navigation', () => {
     expect(
       screen.getByRole('heading', { name: 'Practice Setup' }),
     ).toBeInTheDocument()
+    expect(document.getElementById('main-content')).toHaveFocus()
+    expect(screen.getByText('Practice page loaded.')).toHaveAttribute(
+      'aria-live',
+      'polite',
+    )
   })
 
   it('provides all required application routes', () => {

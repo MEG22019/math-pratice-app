@@ -27,6 +27,19 @@
   box-sizing: border-box;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -1049,6 +1062,14 @@ main {
   font-size: 0.9rem;
 }
 
+.question-card__shortcut {
+  align-self: end;
+  margin: 0.75rem 0 0;
+  color: #52677e;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .question-card__back {
   align-content: start;
 }
@@ -1487,6 +1508,11 @@ main {
   opacity: 0;
 }
 
+.practice-mode:has(input:focus-visible) {
+  outline: 0.2rem solid #9b3f72;
+  outline-offset: 0.2rem;
+}
+
 .practice-mode > span {
   font-size: 2rem;
 }
@@ -1781,6 +1807,10 @@ main {
   .mistake-item {
     grid-template-columns: 1fr;
   }
+
+  .question-card {
+    border-radius: 1.75rem;
+  }
 }
 
 @media (max-width: 42rem) {
@@ -1803,6 +1833,10 @@ main {
     gap: 0.1rem;
     padding: 0.45rem 0.25rem 0.65rem;
     font-size: 0.85rem;
+  }
+
+  .brand__name {
+    font-size: 1.1rem;
   }
 
   .home-page {
@@ -1876,7 +1910,7 @@ main {
   }
 
   .question-card__face {
-    min-height: 30rem;
+    min-height: 28rem;
     padding: 1.35rem;
   }
 
@@ -1929,6 +1963,42 @@ main {
   }
 }
 
+@media (max-width: 24rem) {
+  .page-container {
+    width: min(100% - 1rem, 72rem);
+  }
+
+  .brand__mark {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .main-nav {
+    gap: 0.15rem;
+  }
+
+  .main-nav__link {
+    min-width: 0;
+    font-size: 0.75rem;
+  }
+
+  .choice-grid--operations,
+  .choice-grid--length,
+  .stat-card__metrics,
+  .recent-session dl,
+  .mistake-item dl {
+    grid-template-columns: 1fr;
+  }
+
+  .question-card__problem {
+    font-size: clamp(2.5rem, 16vw, 3.5rem);
+  }
+
+  .answer-choice {
+    padding-inline: 2.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -1937,7 +2007,25 @@ main {
   *,
   *::before,
   *::after {
+    animation-delay: 0s !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :focus-visible,
+  .choice-card:has(input:focus-visible),
+  .practice-mode:has(input:focus-visible) {
+    outline: 0.2rem solid CanvasText;
+  }
+
+  .choice-card--selected,
+  .practice-mode--selected,
+  .answer-choice--selected,
+  .main-nav__link--active {
+    border: 0.18rem solid CanvasText;
   }
 }
