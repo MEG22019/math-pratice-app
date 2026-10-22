@@ -102,78 +102,78 @@
 
 ### 11. Create Question-Generation Utilities
 
-- [ ] Add inclusive random-integer generation.
-- [ ] Add array shuffling.
-- [ ] Add unique ID generation.
-- [ ] Add question validation.
-- [ ] Define difficulty rules for every operation.
+- [x] Add inclusive random-integer generation.
+- [x] Add array shuffling.
+- [x] Add unique ID generation.
+- [x] Add question validation.
+- [x] Define difficulty rules for every operation.
 
 ### 12. Implement Addition Questions
 
-- [ ] Generate two operands.
-- [ ] Apply the selected difficulty rules.
-- [ ] Calculate the correct answer.
-- [ ] Generate the display text.
-- [ ] Return a valid `Question` object.
-- [ ] Test minimum and maximum operand ranges.
-- [ ] Test maximum-result restrictions.
+- [x] Generate two operands.
+- [x] Apply the selected difficulty rules.
+- [x] Calculate the correct answer.
+- [x] Generate the display text.
+- [x] Return a valid `Question` object.
+- [x] Test minimum and maximum operand ranges.
+- [x] Test maximum-result restrictions.
 
 ### 13. Implement Subtraction Questions
 
-- [ ] Generate two operands.
-- [ ] Prevent negative answers for the initial lower difficulty levels.
-- [ ] Apply the selected difficulty rules.
-- [ ] Calculate the correct answer.
-- [ ] Generate the display text.
-- [ ] Return a valid `Question` object.
-- [ ] Test that the first operand is not smaller than the second where required.
+- [x] Generate two operands.
+- [x] Prevent negative answers for the initial lower difficulty levels.
+- [x] Apply the selected difficulty rules.
+- [x] Calculate the correct answer.
+- [x] Generate the display text.
+- [x] Return a valid `Question` object.
+- [x] Test that the first operand is not smaller than the second where required.
 
 ### 14. Implement Multiplication Questions
 
-- [ ] Generate two factors.
-- [ ] Apply the selected difficulty rules.
-- [ ] Calculate the correct product.
-- [ ] Generate the display text.
-- [ ] Return a valid `Question` object.
-- [ ] Test factor ranges for every difficulty level.
+- [x] Generate two factors.
+- [x] Apply the selected difficulty rules.
+- [x] Calculate the correct product.
+- [x] Generate the display text.
+- [x] Return a valid `Question` object.
+- [x] Test factor ranges for every difficulty level.
 
 ### 15. Implement Division Questions
 
-- [ ] Generate a nonzero divisor.
-- [ ] Generate a whole-number quotient.
-- [ ] Calculate the dividend from the divisor and quotient.
-- [ ] Apply the selected difficulty rules.
-- [ ] Generate the display text.
-- [ ] Return a valid `Question` object.
-- [ ] Test that division by zero is impossible.
-- [ ] Test that all answers are whole numbers.
+- [x] Generate a nonzero divisor.
+- [x] Generate a whole-number quotient.
+- [x] Calculate the dividend from the divisor and quotient.
+- [x] Apply the selected difficulty rules.
+- [x] Generate the display text.
+- [x] Return a valid `Question` object.
+- [x] Test that division by zero is impossible.
+- [x] Test that all answers are whole numbers.
 
 ### 16. Create the Main Question Generator
 
-- [ ] Accept an operation and difficulty level.
-- [ ] Call the correct operation-specific generator.
-- [ ] Randomly select an operation when multiple operations are enabled.
-- [ ] Validate the generated question.
-- [ ] Handle unexpected generation failures.
-- [ ] Add unit tests for all operations and difficulty levels.
+- [x] Accept an operation and difficulty level.
+- [x] Call the correct operation-specific generator.
+- [x] Randomly select an operation when multiple operations are enabled.
+- [x] Validate the generated question.
+- [x] Handle unexpected generation failures.
+- [x] Add unit tests for all operations and difficulty levels.
 
 ## Phase 5: Answer Choices
 
 ### 17. Build the Distractor Generator
 
-- [ ] Generate three plausible incorrect answers.
-- [ ] Use nearby values and common arithmetic mistakes.
-- [ ] Add operation-specific distractor strategies.
-- [ ] Prevent duplicate distractors.
-- [ ] Prevent the correct answer from appearing as a distractor.
+- [x] Generate three plausible incorrect answers.
+- [x] Use nearby values and common arithmetic mistakes.
+- [x] Add operation-specific distractor strategies.
+- [x] Prevent duplicate distractors.
+- [x] Prevent the correct answer from appearing as a distractor.
 
 ### 18. Build Final Choice Lists
 
-- [ ] Combine the correct answer and distractors.
-- [ ] Ensure exactly four choices.
-- [ ] Shuffle the choices.
-- [ ] Ensure all choices are unique.
-- [ ] Test that the correct answer appears exactly once.
+- [x] Combine the correct answer and distractors.
+- [x] Ensure exactly four choices.
+- [x] Shuffle the choices.
+- [x] Ensure all choices are unique.
+- [x] Test that the correct answer appears exactly once.
 
 ## Phase 6: Interactive Question Card
 
