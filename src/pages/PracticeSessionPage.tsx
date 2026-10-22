@@ -17,6 +17,7 @@ import {
   saveActiveSession,
   saveCompletedSession,
 } from '../services/storage'
+import { getEncouragingMessage, playResultSound } from '../services/feedback'
 import type {
   ActiveSessionSnapshot,
   PracticeSetupConfiguration,
@@ -64,6 +65,7 @@ function ActivePracticeSession({
     selectedAnswer: restoredSnapshot?.selectedAnswer ?? null,
     isRevealed: restoredSnapshot?.isRevealed ?? false,
   }))
+  const [feedbackMessage, setFeedbackMessage] = useState('')
   const { currentQuestion, isComplete, session } = state
   const isContinuous = session.sessionLength === 'continuous'
   const progressMaximum = isContinuous ? undefined : session.sessionLength
@@ -73,6 +75,14 @@ function ActivePracticeSession({
     .join(', ')
 
   function recordResult(isCorrect: boolean, selectedAnswer: number) {
+    if (settings.soundEffectsEnabled) {
+      playResultSound(isCorrect)
+    }
+    setFeedbackMessage(
+      settings.encouragingFeedbackEnabled
+        ? getEncouragingMessage(isCorrect)
+        : '',
+    )
     setCardState({ selectedAnswer: null, isRevealed: false })
     setState((currentState) =>
       recordPracticeResult(currentState, selectedAnswer, isCorrect),
@@ -173,6 +183,11 @@ function ActivePracticeSession({
         onResult={recordResult}
         onStateChange={setCardState}
       />
+      {feedbackMessage && (
+        <p className="session-feedback" role="status">
+          {feedbackMessage}
+        </p>
+      )}
     </PageContainer>
   )
 }

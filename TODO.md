@@ -309,88 +309,88 @@
 
 ### 40. Calculate Overall Statistics
 
-- [ ] Calculate attempted.
-- [ ] Calculate correct.
-- [ ] Calculate incorrect.
-- [ ] Calculate accuracy.
-- [ ] Handle zero attempts.
+- [x] Calculate attempted.
+- [x] Calculate correct.
+- [x] Calculate incorrect.
+- [x] Calculate accuracy.
+- [x] Handle zero attempts.
 
 ### 41. Calculate Statistics by Operation
 
-- [ ] Addition.
-- [ ] Subtraction.
-- [ ] Multiplication.
-- [ ] Division.
+- [x] Addition.
+- [x] Subtraction.
+- [x] Multiplication.
+- [x] Division.
 
 ### 42. Calculate Statistics by Difficulty
 
-- [ ] Beginner.
-- [ ] Easy.
-- [ ] Intermediate.
-- [ ] Advanced.
+- [x] Beginner.
+- [x] Easy.
+- [x] Intermediate.
+- [x] Advanced.
 
 ### 43. Build the Statistics Overview
 
-- [ ] Display overall attempted.
-- [ ] Display correct.
-- [ ] Display incorrect.
-- [ ] Display accuracy.
-- [ ] Add an empty state.
+- [x] Display overall attempted.
+- [x] Display correct.
+- [x] Display incorrect.
+- [x] Display accuracy.
+- [x] Add an empty state.
 
 ### 44. Build Operation Statistics
 
-- [ ] Display a section/card for every operation.
-- [ ] Display attempted/correct/incorrect/accuracy.
-- [ ] Make cards responsive.
+- [x] Display a section/card for every operation.
+- [x] Display attempted/correct/incorrect/accuracy.
+- [x] Make cards responsive.
 
 ### 45. Build Difficulty Statistics
 
-- [ ] Display a section/card for every difficulty.
-- [ ] Use readable labels.
+- [x] Display a section/card for every difficulty.
+- [x] Use readable labels.
 
 ### 46. Add Recent Sessions
 
-- [ ] Show recent sessions newest first.
-- [ ] Display date.
-- [ ] Display operations.
-- [ ] Display difficulty.
-- [ ] Display totals and accuracy.
+- [x] Show recent sessions newest first.
+- [x] Display date.
+- [x] Display operations.
+- [x] Display difficulty.
+- [x] Display totals and accuracy.
 
 ### 47. Add Reset Statistics
 
-- [ ] Add a reset action.
-- [ ] Ask for confirmation.
-- [ ] Clear practice history/statistics.
-- [ ] Keep application settings unchanged.
+- [x] Add a reset action.
+- [x] Ask for confirmation.
+- [x] Clear practice history/statistics.
+- [x] Keep application settings unchanged.
 
 ## Phase 11: Settings
 
 ### 48. Create the Settings Page
 
-- [ ] Add a sound-effects setting.
-- [ ] Add a card-animation setting.
-- [ ] Add a show-explanations setting.
-- [ ] Add a feedback-messages setting.
-- [ ] Add a mastery-threshold setting.
-- [ ] Add a default session-length setting.
-- [ ] Add a default difficulty setting.
-- [ ] Add default operation settings.
-- [ ] Save settings automatically or through a save button.
+- [x] Add a sound-effects setting.
+- [x] Add a card-animation setting.
+- [x] Add a show-explanations setting.
+- [x] Add a feedback-messages setting.
+- [x] Add a mastery-threshold setting.
+- [x] Add a default session-length setting.
+- [x] Add a default difficulty setting.
+- [x] Add default operation settings.
+- [x] Save settings automatically or through a save button.
 
 ### 49. Apply Default Practice Settings
 
-- [ ] Load default operations on the setup page.
-- [ ] Load the default difficulty.
-- [ ] Load the default session length.
-- [ ] Allow defaults to be changed for an individual session without overwriting saved defaults.
+- [x] Load default operations on the setup page.
+- [x] Load the default difficulty.
+- [x] Load the default session length.
+- [x] Allow defaults to be changed for an individual session without overwriting saved defaults.
 
 ### 50. Add Clear-All-Data Functionality
 
-- [ ] Add a **Clear All Application Data** button.
-- [ ] Show a strong confirmation warning.
-- [ ] Clear settings, sessions, attempts, statistics, mistake patterns, and active-session data.
-- [ ] Restore application defaults.
-- [ ] Return the user to the home page.
+- [x] Add a **Clear All Application Data** button.
+- [x] Show a strong confirmation warning.
+- [x] Clear settings, sessions, attempts, statistics, mistake patterns, and active-session data.
+- [x] Restore application defaults.
+- [x] Return the user to the home page.
 
 ## Phase 12: Mistake Tracking
 
@@ -556,17 +556,17 @@
 
 ### 72. Improve Statistics Layout
 
-- [ ] Reflow metric cards on small screens.
-- [ ] Prevent labels from overlapping.
-- [ ] Make recent-session rows/cards responsive.
+- [x] Reflow metric cards on small screens.
+- [x] Prevent labels from overlapping.
+- [x] Make recent-session rows/cards responsive.
 
 ### 73. Add Child-Friendly Feedback
 
-- [ ] Create positive feedback messages.
-- [ ] Create supportive incorrect-answer messages.
-- [ ] Avoid shaming language.
-- [ ] Show feedback after the student self-reports.
-- [ ] Allow feedback to be disabled in Settings.
+- [x] Create positive feedback messages.
+- [x] Create supportive incorrect-answer messages.
+- [x] Avoid shaming language.
+- [x] Show feedback after the student self-reports.
+- [x] Allow feedback to be disabled in Settings.
 
 ## Phase 18: Session Recovery and Navigation Safety
 
@@ -624,7 +624,7 @@
 - [ ] Test difficulty boundaries.
 - [ ] Test distractor generation.
 - [ ] Test answer uniqueness.
-- [ ] Test statistics calculations.
+- [x] Test statistics calculations.
 - [ ] Test mistake pattern behavior.
 - [ ] Test similar-question generation.
 - [ ] Test mastery rules.
@@ -639,8 +639,8 @@
 - [ ] Test right and wrong buttons.
 - [ ] Test progress updates.
 - [ ] Test session completion.
-- [ ] Test statistics display.
-- [ ] Test confirmation dialogs.
+- [x] Test statistics display.
+- [x] Test confirmation dialogs.
 
 ### 81. Complete Integration Tests
 
@@ -651,7 +651,7 @@
 - [ ] Test mistake-review generation.
 - [ ] Test mastery completion.
 - [ ] Test persistence after a browser refresh.
-- [ ] Test resetting statistics.
+- [x] Test resetting statistics.
 
 ### 82. Complete Accessibility Testing
 

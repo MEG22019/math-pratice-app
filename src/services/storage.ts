@@ -425,3 +425,30 @@ export function saveActiveSession(
 export function clearActiveSession(storage = getBrowserStorage()): boolean {
   return safeRemove('activeSession', storage)
 }
+
+export function resetPracticeHistory(storage = getBrowserStorage()): boolean {
+  const categories: StorageCategory[] = [
+    'sessions',
+    'attempts',
+    'mistakePatterns',
+    'lastSummarySessionId',
+  ]
+
+  return categories
+    .map((category) => safeRemove(category, storage))
+    .every(Boolean)
+}
+
+export function clearAllApplicationData(
+  storage = getBrowserStorage(),
+): boolean {
+  if (!storage) {
+    return false
+  }
+
+  const cleared = (Object.keys(storageKeys) as StorageCategory[])
+    .map((category) => safeRemove(category, storage))
+    .every(Boolean)
+
+  return cleared && initializeStorage(storage)
+}

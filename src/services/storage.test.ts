@@ -8,6 +8,7 @@ import type {
 } from '../types'
 import {
   clearActiveSession,
+  clearAllApplicationData,
   defaultSettings,
   initializeStorage,
   loadActiveSession,
@@ -15,6 +16,7 @@ import {
   loadSessions,
   loadSettings,
   MAX_STORED_SESSIONS,
+  resetPracticeHistory,
   runStorageMigrations,
   sanitizeSettings,
   saveActiveSession,
@@ -135,6 +137,32 @@ describe('history persistence', () => {
 
     expect(loadSessions()).toHaveLength(MAX_STORED_SESSIONS)
     expect(loadSessions()[0].id).toBe(`session-${MAX_STORED_SESSIONS + 4}`)
+  })
+
+  it('resets practice history while preserving settings', () => {
+    const settings = { ...defaultSettings, showExplanations: false }
+    saveSettings(settings)
+    saveCompletedSession(createCompletedSession())
+
+    expect(resetPracticeHistory()).toBe(true)
+    expect(loadSessions()).toEqual([])
+    expect(loadAttempts()).toEqual([])
+    expect(loadSettings()).toEqual(settings)
+  })
+
+  it('clears every application category and restores defaults', () => {
+    saveSettings({ ...defaultSettings, defaultDifficulty: 4 })
+    saveCompletedSession(createCompletedSession())
+    localStorage.setItem(
+      storageKeys.activeSession,
+      JSON.stringify({ invalid: true }),
+    )
+
+    expect(clearAllApplicationData()).toBe(true)
+    expect(loadSettings()).toEqual(defaultSettings)
+    expect(loadSessions()).toEqual([])
+    expect(loadAttempts()).toEqual([])
+    expect(localStorage.getItem(storageKeys.activeSession)).toBeNull()
   })
 })
 

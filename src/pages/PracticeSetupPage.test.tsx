@@ -85,9 +85,9 @@ describe('Practice Setup', () => {
     ).toBeInTheDocument()
 
     expect(loadSettings()).toMatchObject({
-      defaultOperations: ['addition', 'multiplication'],
-      defaultDifficulty: 4,
-      defaultSessionLength: 'continuous',
+      defaultOperations: ['addition'],
+      defaultDifficulty: 1,
+      defaultSessionLength: 10,
     })
   })
 

@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
 import { AppRoutes } from '../components/App'
+import { defaultSettings, saveSettings } from '../services/storage'
 import type { PracticeSetupConfiguration } from '../types'
 
 function renderSession(configuration: PracticeSetupConfiguration) {
@@ -110,5 +111,30 @@ describe('PracticeSessionPage', () => {
     expect(
       screen.getAllByText(selectedAnswer, { selector: 'strong' }).length,
     ).toBeGreaterThanOrEqual(1)
+  })
+
+  it('applies animation, explanation, and feedback preferences', async () => {
+    const user = userEvent.setup()
+    saveSettings({
+      ...defaultSettings,
+      cardAnimationEnabled: false,
+      showExplanations: false,
+      encouragingFeedbackEnabled: false,
+    })
+    const { container } = renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 'continuous',
+      mode: 'regular',
+    })
+
+    expect(container.querySelector('.question-card')).toHaveClass(
+      'question-card--no-animation',
+    )
+    await user.click(screen.getAllByRole('button', { name: /^Answer / })[0])
+    await user.click(screen.getByRole('button', { name: 'Check My Answer' }))
+    expect(screen.queryByText(/ equals /)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'I Got It Right' }))
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 })

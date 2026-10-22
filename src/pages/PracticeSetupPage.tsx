@@ -6,7 +6,7 @@ import { OperationSelector } from '../components/practice/OperationSelector'
 import { SessionLengthSelector } from '../components/practice/SessionLengthSelector'
 import { Button } from '../components/ui/Button'
 import { PageContainer } from '../components/layout/PageContainer'
-import { loadSettings, saveSettings } from '../services/storage'
+import { loadSettings } from '../services/storage'
 import type {
   DifficultyLevel,
   MathOperation,
@@ -42,12 +42,6 @@ export function PracticeSetupPage() {
       mode: 'regular',
     }
 
-    saveSettings({
-      ...settings,
-      defaultOperations: operations,
-      defaultDifficulty: difficulty,
-      defaultSessionLength: sessionLength,
-    })
     navigate('/practice/session', { state: { configuration } })
   }
 
@@ -83,7 +77,7 @@ export function PracticeSetupPage() {
           <Button disabled={!hasOperation} type="submit">
             Start Session <span aria-hidden="true">→</span>
           </Button>
-          <p>We’ll remember these choices for your next practice session.</p>
+          <p>You can change your saved defaults in Settings.</p>
         </div>
       </form>
     </PageContainer>
