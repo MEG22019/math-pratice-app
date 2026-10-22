@@ -9,6 +9,13 @@ export type SessionLength = 5 | 10 | 20 | 'continuous'
 
 export type PracticeMode = 'regular' | 'mistake-review'
 
+export interface PracticeSetupConfiguration {
+  operations: MathOperation[]
+  difficulty: DifficultyLevel
+  sessionLength: SessionLength
+  mode: PracticeMode
+}
+
 export interface Question {
   id: string
   operation: MathOperation

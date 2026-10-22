@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { HomePage } from '../pages/HomePage'
+import { PracticeSessionPage } from '../pages/PracticeSessionPage'
+import { PracticeSetupPage } from '../pages/PracticeSetupPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
 import { AppShell } from './layout/AppShell'
 
@@ -9,28 +11,8 @@ export function AppRoutes() {
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<HomePage />} />
-        <Route
-          path="practice/setup"
-          element={
-            <PlaceholderPage
-              eyebrow="Choose your challenge"
-              title="Practice Setup"
-              description="Soon you’ll be able to pick your math operations, difficulty, and practice length here."
-              symbol="✏️"
-            />
-          }
-        />
-        <Route
-          path="practice/session"
-          element={
-            <PlaceholderPage
-              eyebrow="Let’s solve it"
-              title="Practice Session"
-              description="Your interactive question cards will appear here once practice is ready."
-              symbol="🧠"
-            />
-          }
-        />
+        <Route path="practice/setup" element={<PracticeSetupPage />} />
+        <Route path="practice/session" element={<PracticeSessionPage />} />
         <Route
           path="practice/summary"
           element={

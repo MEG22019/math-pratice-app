@@ -63,40 +63,40 @@
 
 ### 7. Build the Operation Selector
 
-- [ ] Add Addition.
-- [ ] Add Subtraction.
-- [ ] Add Multiplication.
-- [ ] Add Division.
-- [ ] Support selecting multiple operations.
-- [ ] Add Select All Operations.
-- [ ] Show selected state clearly.
+- [x] Add Addition.
+- [x] Add Subtraction.
+- [x] Add Multiplication.
+- [x] Add Division.
+- [x] Support selecting multiple operations.
+- [x] Add Select All Operations.
+- [x] Show selected state clearly.
 
 ### 8. Build the Difficulty Selector
 
-- [ ] Add Beginner.
-- [ ] Add Easy.
-- [ ] Add Intermediate.
-- [ ] Add Advanced.
-- [ ] Allow only one difficulty at a time.
-- [ ] Add short descriptions for each level.
+- [x] Add Beginner.
+- [x] Add Easy.
+- [x] Add Intermediate.
+- [x] Add Advanced.
+- [x] Allow only one difficulty at a time.
+- [x] Add short descriptions for each level.
 
 ### 9. Build the Session-Length Selector
 
-- [ ] Add 5 questions.
-- [ ] Add 10 questions.
-- [ ] Add 20 questions.
-- [ ] Add Continuous Practice.
-- [ ] Use 10 questions as the initial default.
+- [x] Add 5 questions.
+- [x] Add 10 questions.
+- [x] Add 20 questions.
+- [x] Add Continuous Practice.
+- [x] Use 10 questions as the initial default.
 
 ### 10. Build the Practice Setup Page
 
-- [ ] Add the operation selector.
-- [ ] Add the difficulty selector.
-- [ ] Add the session-length selector.
-- [ ] Add a **Start Session** button.
-- [ ] Disable the button when no operation is selected.
-- [ ] Display a validation message when necessary.
-- [ ] Pass the selected configuration to the practice session.
+- [x] Add the operation selector.
+- [x] Add the difficulty selector.
+- [x] Add the session-length selector.
+- [x] Add a **Start Session** button.
+- [x] Disable the button when no operation is selected.
+- [x] Display a validation message when necessary.
+- [x] Pass the selected configuration to the practice session.
 
 ## Phase 4: Question Generation
 

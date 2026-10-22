@@ -1,0 +1,80 @@
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import { describe, expect, it } from 'vitest'
+
+import { AppRoutes } from '../components/App'
+
+function renderSetup() {
+  return render(
+    <MemoryRouter initialEntries={['/practice/setup']}>
+      <AppRoutes />
+    </MemoryRouter>,
+  )
+}
+
+describe('Practice Setup', () => {
+  it('starts with Addition, Beginner, and 10 questions selected', () => {
+    renderSetup()
+
+    expect(screen.getByRole('checkbox', { name: 'Addition' })).toBeChecked()
+    expect(screen.getByRole('radio', { name: /Beginner/i })).toBeChecked()
+    expect(screen.getByRole('radio', { name: /10.*Just right/i })).toBeChecked()
+  })
+
+  it('supports selecting multiple operations and all operations', async () => {
+    const user = userEvent.setup()
+    renderSetup()
+
+    await user.click(screen.getByRole('checkbox', { name: 'Multiplication' }))
+
+    expect(screen.getByRole('checkbox', { name: 'Addition' })).toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Multiplication' }),
+    ).toBeChecked()
+
+    await user.click(
+      screen.getByRole('button', { name: 'Select all operations' }),
+    )
+
+    for (const operation of [
+      'Addition',
+      'Subtraction',
+      'Multiplication',
+      'Division',
+    ]) {
+      expect(screen.getByRole('checkbox', { name: operation })).toBeChecked()
+    }
+  })
+
+  it('requires at least one operation', async () => {
+    const user = userEvent.setup()
+    renderSetup()
+
+    await user.click(screen.getByRole('checkbox', { name: 'Addition' }))
+
+    expect(
+      screen.getByText(/choose at least one math operation/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /start session/i }),
+    ).toBeDisabled()
+  })
+
+  it('passes the selected configuration to the practice session', async () => {
+    const user = userEvent.setup()
+    renderSetup()
+
+    await user.click(screen.getByRole('checkbox', { name: 'Multiplication' }))
+    await user.click(screen.getByRole('radio', { name: /Advanced/i }))
+    await user.click(screen.getByRole('radio', { name: /Continuous/i }))
+    await user.click(screen.getByRole('button', { name: /start session/i }))
+
+    expect(
+      screen.getByRole('heading', { name: 'Your practice is ready!' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Addition, Multiplication')).toBeInTheDocument()
+    expect(screen.getByText('Advanced')).toBeInTheDocument()
+    expect(screen.getByText('Continuous practice')).toBeInTheDocument()
+  })
+})
