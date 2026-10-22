@@ -71,10 +71,12 @@ describe('Practice Setup', () => {
     await user.click(screen.getByRole('button', { name: /start session/i }))
 
     expect(
-      screen.getByRole('heading', { name: 'Your practice is ready!' }),
+      screen.getByRole('heading', { name: 'Question 1' }),
     ).toBeInTheDocument()
-    expect(screen.getByText('Addition, Multiplication')).toBeInTheDocument()
-    expect(screen.getByText('Advanced')).toBeInTheDocument()
-    expect(screen.getByText('Continuous practice')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Addition, Multiplication · Advanced · Continuous practice',
+      ),
+    ).toBeInTheDocument()
   })
 })

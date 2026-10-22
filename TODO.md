@@ -179,75 +179,75 @@
 
 ### 19. Build the Card Front
 
-- [ ] Display the question.
-- [ ] Display four answer choices.
-- [ ] Allow one answer to be selected.
-- [ ] Show selected state clearly.
-- [ ] Add a control to reveal/flip the card.
+- [x] Display the question.
+- [x] Display four answer choices.
+- [x] Allow one answer to be selected.
+- [x] Show selected state clearly.
+- [x] Add a control to reveal/flip the card.
 
 ### 20. Build the Card Back
 
-- [ ] Display the correct answer.
-- [ ] Display the selected answer.
-- [ ] Add **I Got It Right**.
-- [ ] Add **I Got It Wrong**.
-- [ ] Support optional explanation content.
+- [x] Display the correct answer.
+- [x] Display the selected answer.
+- [x] Add **I Got It Right**.
+- [x] Add **I Got It Wrong**.
+- [x] Support optional explanation content.
 
 ### 21. Add Card Interaction
 
-- [ ] Track selected answer.
-- [ ] Flip between front and back.
-- [ ] Respect animation settings.
-- [ ] Prevent accidental duplicate result submission.
-- [ ] Add component tests.
+- [x] Track selected answer.
+- [x] Flip between front and back.
+- [x] Respect animation settings.
+- [x] Prevent accidental duplicate result submission.
+- [x] Add component tests.
 
 ## Phase 7: Practice Session Flow
 
 ### 22. Create Session State
 
-- [ ] Create a new session from the setup configuration.
-- [ ] Generate the first question.
-- [ ] Track current question.
-- [ ] Track attempts.
-- [ ] Track correct and incorrect totals.
+- [x] Create a new session from the setup configuration.
+- [x] Generate the first question.
+- [x] Track current question.
+- [x] Track attempts.
+- [x] Track correct and incorrect totals.
 
 ### 23. Record Attempts
 
-- [ ] Save selected answer.
-- [ ] Save self-reported correct/incorrect status.
-- [ ] Save operation and difficulty.
-- [ ] Save question source.
-- [ ] Save timestamp and session ID.
+- [x] Save selected answer.
+- [x] Save self-reported correct/incorrect status.
+- [x] Save operation and difficulty.
+- [x] Save question source.
+- [x] Save timestamp and session ID.
 
 ### 24. Add Session Progress
 
-- [ ] Display attempted count.
-- [ ] Display progress for fixed-length sessions.
-- [ ] Support continuous-practice display.
-- [ ] Update progress after each completed question.
+- [x] Display attempted count.
+- [x] Display progress for fixed-length sessions.
+- [x] Support continuous-practice display.
+- [x] Update progress after each completed question.
 
 ### 25. Advance Questions
 
-- [ ] Generate the next question after a result is recorded.
-- [ ] Reset card state between questions.
-- [ ] Preserve session totals.
-- [ ] Support mixed-operation sessions.
+- [x] Generate the next question after a result is recorded.
+- [x] Reset card state between questions.
+- [x] Preserve session totals.
+- [x] Support mixed-operation sessions.
 
 ### 26. Verify Regular Session Flow
 
-- [ ] Test a fixed-length session.
-- [ ] Test mixed operations.
-- [ ] Test continuous practice.
-- [ ] Test correct/incorrect totals.
-- [ ] Test progress updates.
+- [x] Test a fixed-length session.
+- [x] Test mixed operations.
+- [x] Test continuous practice.
+- [x] Test correct/incorrect totals.
+- [x] Test progress updates.
 
 ## Phase 8: Session Completion and Summary
 
 ### 32. Detect Session Completion
 
-- [ ] Detect when a fixed-length session reaches its target.
-- [ ] Stop generating questions after completion.
-- [ ] Save completion time.
+- [x] Detect when a fixed-length session reaches its target.
+- [x] Stop generating questions after completion.
+- [x] Save completion time.
 - [ ] Navigate to the summary page.
 
 ### 33. Build the Session Summary Page
