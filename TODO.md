@@ -620,10 +620,10 @@
 
 ### 79. Complete Unit Tests
 
-- [ ] Test all question generators.
-- [ ] Test difficulty boundaries.
-- [ ] Test distractor generation.
-- [ ] Test answer uniqueness.
+- [x] Test all question generators.
+- [x] Test difficulty boundaries.
+- [x] Test distractor generation.
+- [x] Test answer uniqueness.
 - [x] Test statistics calculations.
 - [x] Test mistake pattern behavior.
 - [x] Test similar-question generation.
@@ -632,21 +632,21 @@
 
 ### 80. Complete Component Tests
 
-- [ ] Test operation selection.
-- [ ] Test difficulty selection.
-- [ ] Test answer selection.
-- [ ] Test card flipping.
-- [ ] Test right and wrong buttons.
-- [ ] Test progress updates.
-- [ ] Test session completion.
+- [x] Test operation selection.
+- [x] Test difficulty selection.
+- [x] Test answer selection.
+- [x] Test card flipping.
+- [x] Test right and wrong buttons.
+- [x] Test progress updates.
+- [x] Test session completion.
 - [x] Test statistics display.
 - [x] Test confirmation dialogs.
 
 ### 81. Complete Integration Tests
 
-- [ ] Test a full addition session.
-- [ ] Test a mixed-operation session.
-- [ ] Test continuous practice.
+- [x] Test a full addition session.
+- [x] Test a mixed-operation session.
+- [x] Test continuous practice.
 - [x] Test an incorrect answer creating a mistake pattern.
 - [x] Test mistake-review generation.
 - [x] Test mastery completion.
@@ -666,28 +666,28 @@
 
 ### 83. Optimize React Rendering
 
-- [ ] Memoize expensive statistics calculations.
-- [ ] Avoid unnecessary global/context updates.
-- [ ] Avoid generating questions unnecessarily during render.
-- [ ] Verify practice interactions stay responsive.
+- [x] Memoize expensive statistics calculations.
+- [x] Avoid unnecessary global/context updates.
+- [x] Avoid generating questions unnecessarily during render.
+- [x] Verify practice interactions stay responsive.
 
 ### 84. Manage Large Practice Histories
 
-- [ ] Define a maximum raw-attempt history.
-- [ ] Trim older attempts when the limit is exceeded.
-- [ ] Preserve older totals through archived aggregate statistics.
-- [ ] Measure local-storage usage.
-- [ ] Limit the number of recent sessions displayed.
-- [ ] Add large-history tests.
+- [x] Define a maximum raw-attempt history.
+- [x] Trim older attempts when the limit is exceeded.
+- [x] Preserve older totals through archived aggregate statistics.
+- [x] Measure local-storage usage.
+- [x] Limit the number of recent sessions displayed.
+- [x] Add large-history tests.
 
 ### 85. Improve Loading Performance
 
-- [ ] Lazy-load large secondary pages where appropriate.
-- [ ] Add a loading fallback.
-- [ ] Review bundle size.
-- [ ] Remove unused assets/dependencies.
-- [ ] Optimize web-font loading.
-- [ ] Add a build-size or equivalent verification command.
+- [x] Lazy-load large secondary pages where appropriate.
+- [x] Add a loading fallback.
+- [x] Review bundle size.
+- [x] Remove unused assets/dependencies.
+- [x] Optimize web-font loading.
+- [x] Add a build-size or equivalent verification command.
 
 ## Phase 22: Privacy, Release, and Deployment
 

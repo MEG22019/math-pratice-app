@@ -50,7 +50,7 @@ describe('App navigation', () => {
     )
   })
 
-  it('provides all required application routes', () => {
+  it('provides all required application routes', async () => {
     const routes = [
       ['/practice/session', 'No practice setup found'],
       ['/practice/summary', 'Session summary unavailable'],
@@ -58,11 +58,13 @@ describe('App navigation', () => {
       ['/settings', 'Settings'],
     ]
 
-    routes.forEach(([route, heading]) => {
+    for (const [route, heading] of routes) {
       const { unmount } = renderRoute(route)
-      expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument()
+      expect(
+        await screen.findByRole('heading', { name: heading }),
+      ).toBeInTheDocument()
       unmount()
-    })
+    }
   })
 
   it('redirects unknown routes safely to Home', () => {

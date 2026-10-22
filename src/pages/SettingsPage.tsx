@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button'
 import {
   clearAllApplicationData,
   defaultSettings,
+  getStorageUsage,
   loadSettings,
   saveSettings,
 } from '../services/storage'
@@ -21,6 +22,7 @@ export function SettingsPage() {
     String(settings.mistakeMasteryThreshold),
   )
   const [saveMessage, setSaveMessage] = useState('')
+  const [storageUsage, setStorageUsage] = useState(getStorageUsage)
 
   function updateSetting<Key extends keyof ApplicationSettings>(
     key: Key,
@@ -54,11 +56,15 @@ export function SettingsPage() {
     }
     setSettings(validatedSettings)
 
+    const saved = saveSettings(validatedSettings)
     setSaveMessage(
-      saveSettings(validatedSettings)
+      saved
         ? 'Settings saved! Your next practice session will use these defaults.'
         : 'Settings could not be saved. Please check your browser storage settings.',
     )
+    if (saved) {
+      setStorageUsage(getStorageUsage())
+    }
   }
 
   function clearAllData() {
@@ -219,6 +225,12 @@ export function SettingsPage() {
             This permanently removes settings, practice history, progress, and
             active sessions from this browser.
           </p>
+          {storageUsage && (
+            <p>
+              Saved Math Practice data currently uses about{' '}
+              {storageUsage.kilobytes} KB in this browser.
+            </p>
+          )}
         </div>
         <Button type="button" variant="secondary" onClick={clearAllData}>
           Clear All Application Data

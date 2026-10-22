@@ -84,6 +84,45 @@ describe('PracticeSessionPage', () => {
     expect(screen.getByText('100%')).toBeInTheDocument()
   })
 
+  it('runs a complete mixed-operation session', async () => {
+    const user = userEvent.setup()
+    let randomCall = 0
+    vi.spyOn(Math, 'random').mockImplementation(() => {
+      const positionWithinQuestion = randomCall % 6
+      const questionNumber = Math.floor(randomCall / 6)
+      randomCall += 1
+      if (positionWithinQuestion === 0) {
+        return questionNumber % 2 === 0 ? 0 : 0.999_999
+      }
+      return 0.5
+    })
+    renderSession({
+      operations: ['addition', 'division'],
+      difficulty: 1,
+      sessionLength: 5,
+      mode: 'regular',
+    })
+    const seenOperations = new Set<string>()
+
+    for (let questionNumber = 1; questionNumber <= 5; questionNumber += 1) {
+      const problem = screen.getByRole('heading', {
+        level: 2,
+        name: / = \?/,
+      }).textContent
+      if (problem?.includes('+')) seenOperations.add('addition')
+      if (problem?.includes('÷')) seenOperations.add('division')
+
+      await user.click(screen.getAllByRole('button', { name: /^Answer / })[0])
+      await user.click(screen.getByRole('button', { name: 'Check My Answer' }))
+      await user.click(screen.getByRole('button', { name: 'I Got It Right' }))
+    }
+
+    expect(seenOperations).toEqual(new Set(['addition', 'division']))
+    expect(
+      await screen.findByRole('heading', { name: 'Session Summary' }),
+    ).toBeInTheDocument()
+  })
+
   it('runs a complete session using only the keyboard', async () => {
     const user = userEvent.setup()
     renderSession({

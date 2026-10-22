@@ -1,4 +1,8 @@
 import { validateQuestion } from '../features/questions'
+import {
+  archiveAttempts,
+  createEmptyStatisticsArchive,
+} from '../features/statistics/statistics'
 import type {
   ActiveSessionSnapshot,
   ApplicationSettings,
@@ -8,20 +12,23 @@ import type {
   PracticeAttempt,
   PracticeMode,
   PracticeSession,
+  PracticeStatisticsArchive,
   Question,
   QuestionSource,
   SessionLength,
 } from '../types'
 
-export const STORAGE_VERSION = 1
+export const STORAGE_VERSION = 2
 export const MAX_STORED_SESSIONS = 100
 export const MAX_STORED_ATTEMPTS = 2_000
+export const MAX_STORED_SESSION_ATTEMPTS = 100
 
 export const storageKeys = {
   version: 'math-practice:version',
   settings: 'math-practice:settings',
   sessions: 'math-practice:sessions',
   attempts: 'math-practice:attempts',
+  archivedStatistics: 'math-practice:archived-statistics',
   mistakePatterns: 'math-practice:mistake-patterns',
   activeSession: 'math-practice:active-session',
   lastSummarySessionId: 'math-practice:last-summary-session-id',
@@ -109,6 +116,43 @@ function isNonnegativeInteger(value: unknown): value is number {
   return Number.isInteger(value) && Number(value) >= 0
 }
 
+function isStatisticsTotals(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isNonnegativeInteger(value.attempted) &&
+    isNonnegativeInteger(value.correct) &&
+    isNonnegativeInteger(value.incorrect) &&
+    value.correct + value.incorrect === value.attempted
+  )
+}
+
+function isStatisticsArchive(
+  value: unknown,
+): value is PracticeStatisticsArchive {
+  if (
+    !isRecord(value) ||
+    !isRecord(value.byOperation) ||
+    !isRecord(value.byDifficulty)
+  ) {
+    return false
+  }
+
+  return (
+    isStatisticsTotals(value) &&
+    isStatisticsTotals(value.byOperation.addition) &&
+    isStatisticsTotals(value.byOperation.subtraction) &&
+    isStatisticsTotals(value.byOperation.multiplication) &&
+    isStatisticsTotals(value.byOperation.division) &&
+    isStatisticsTotals(value.byDifficulty[1]) &&
+    isStatisticsTotals(value.byDifficulty[2]) &&
+    isStatisticsTotals(value.byDifficulty[3]) &&
+    isStatisticsTotals(value.byDifficulty[4]) &&
+    isNonnegativeInteger(value.reviewAttempted) &&
+    isNonnegativeInteger(value.reviewCorrect) &&
+    value.reviewCorrect <= value.reviewAttempted
+  )
+}
+
 function hasValidArithmetic(
   operation: MathOperation,
   firstOperand: number,
@@ -186,8 +230,12 @@ export function isPracticeSession(value: unknown): value is PracticeSession {
     isNonnegativeInteger(value.correctCount) &&
     isNonnegativeInteger(value.incorrectCount) &&
     attempts.every(isPracticeAttempt) &&
-    value.attemptedCount === attempts.length &&
+    value.attemptedCount >= attempts.length &&
     value.correctCount + value.incorrectCount === value.attemptedCount &&
+    attempts.filter((attempt) => attempt.isCorrect).length <=
+      value.correctCount &&
+    attempts.filter((attempt) => !attempt.isCorrect).length <=
+      value.incorrectCount &&
     attempts.every(
       (attempt) =>
         attempt.sessionId === value.id &&
@@ -277,6 +325,7 @@ function migrateFromVersion0(storage: Storage): boolean {
     ['settings', defaultSettings],
     ['sessions', []],
     ['attempts', []],
+    ['archivedStatistics', createEmptyStatisticsArchive()],
     ['mistakePatterns', []],
   ]
 
@@ -288,6 +337,26 @@ function migrateFromVersion0(storage: Storage): boolean {
     } catch {
       return false
     }
+  }
+
+  return safeWrite('version', STORAGE_VERSION, storage)
+}
+
+function migrateFromVersion1(storage: Storage): boolean {
+  try {
+    if (storage.getItem(storageKeys.archivedStatistics) === null) {
+      if (
+        !safeWrite(
+          'archivedStatistics',
+          createEmptyStatisticsArchive(),
+          storage,
+        )
+      ) {
+        return false
+      }
+    }
+  } catch {
+    return false
   }
 
   return safeWrite('version', STORAGE_VERSION, storage)
@@ -306,6 +375,10 @@ export function runStorageMigrations(storage = getBrowserStorage()): boolean {
 
   if (storedVersion === undefined || storedVersion === 0) {
     return migrateFromVersion0(storage)
+  }
+
+  if (storedVersion === 1) {
+    return migrateFromVersion1(storage)
   }
 
   // Unknown future versions are left untouched to avoid destructive downgrades.
@@ -367,6 +440,11 @@ export function initializeStorageWithReport(
       fallback: [],
       validate: (value) =>
         Array.isArray(value) && value.every(isPracticeAttempt),
+    },
+    {
+      category: 'archivedStatistics',
+      fallback: createEmptyStatisticsArchive(),
+      validate: isStatisticsArchive,
     },
     {
       category: 'mistakePatterns',
@@ -498,6 +576,13 @@ export function loadAttempts(storage = getBrowserStorage()): PracticeAttempt[] {
     : []
 }
 
+export function loadArchivedStatistics(
+  storage = getBrowserStorage(),
+): PracticeStatisticsArchive {
+  const value = safeRead('archivedStatistics', storage)
+  return isStatisticsArchive(value) ? value : createEmptyStatisticsArchive()
+}
+
 export function loadMistakePatterns(
   storage = getBrowserStorage(),
 ): MistakePattern[] {
@@ -524,20 +609,43 @@ export function saveCompletedSession(
     return false
   }
 
-  const sessions = [
-    session,
-    ...loadSessions(storage).filter((stored) => stored.id !== session.id),
-  ].slice(0, MAX_STORED_SESSIONS)
+  const storedSessions = loadSessions(storage)
+  if (storedSessions.some((stored) => stored.id === session.id)) {
+    return safeWrite('lastSummarySessionId', session.id, storage)
+  }
+
+  const storedSession: PracticeSession = {
+    ...session,
+    attempts: session.attempts.slice(-MAX_STORED_SESSION_ATTEMPTS),
+  }
+  const sessions = [storedSession, ...storedSessions].slice(
+    0,
+    MAX_STORED_SESSIONS,
+  )
   const attemptIds = new Set(session.attempts.map((attempt) => attempt.id))
-  const attempts = [
+  const combinedAttempts = [
     ...session.attempts,
     ...loadAttempts(storage).filter((attempt) => !attemptIds.has(attempt.id)),
-  ].slice(0, MAX_STORED_ATTEMPTS)
+  ].sort(
+    (first, second) =>
+      Date.parse(second.timestamp) - Date.parse(first.timestamp),
+  )
+  const attempts = combinedAttempts.slice(0, MAX_STORED_ATTEMPTS)
+  const droppedAttempts = combinedAttempts.slice(MAX_STORED_ATTEMPTS)
+  const archivedStatistics = archiveAttempts(
+    loadArchivedStatistics(storage),
+    droppedAttempts,
+  )
 
   const sessionsSaved = safeWrite('sessions', sessions, storage)
   const attemptsSaved = safeWrite('attempts', attempts, storage)
+  const archiveSaved = safeWrite(
+    'archivedStatistics',
+    archivedStatistics,
+    storage,
+  )
   const summarySaved = safeWrite('lastSummarySessionId', session.id, storage)
-  return sessionsSaved && attemptsSaved && summarySaved
+  return sessionsSaved && attemptsSaved && archiveSaved && summarySaved
 }
 
 export function loadSession(
@@ -614,6 +722,7 @@ export function resetPracticeHistory(storage = getBrowserStorage()): boolean {
   const categories: StorageCategory[] = [
     'sessions',
     'attempts',
+    'archivedStatistics',
     'mistakePatterns',
     'lastSummarySessionId',
   ]
@@ -621,6 +730,33 @@ export function resetPracticeHistory(storage = getBrowserStorage()): boolean {
   return categories
     .map((category) => safeRemove(category, storage))
     .every(Boolean)
+}
+
+export interface StorageUsage {
+  bytes: number
+  kilobytes: number
+}
+
+export function getStorageUsage(
+  storage = getBrowserStorage(),
+): StorageUsage | undefined {
+  if (!storage) {
+    return undefined
+  }
+
+  try {
+    const bytes = Object.values(storageKeys).reduce((total, key) => {
+      const value = storage.getItem(key)
+      return value === null ? total : total + (key.length + value.length) * 2
+    }, 0)
+
+    return {
+      bytes,
+      kilobytes: Math.round((bytes / 1024) * 10) / 10,
+    }
+  } catch {
+    return undefined
+  }
 }
 
 export function clearAllApplicationData(

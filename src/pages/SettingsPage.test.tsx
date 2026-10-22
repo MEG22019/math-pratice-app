@@ -12,12 +12,14 @@ import {
 } from '../services/storage'
 import type { PracticeSession } from '../types'
 
-function renderSettings() {
-  return render(
+async function renderSettings() {
+  const rendered = render(
     <MemoryRouter initialEntries={['/settings']}>
       <AppRoutes />
     </MemoryRouter>,
   )
+  await screen.findByRole('heading', { name: 'Settings' })
+  return rendered
 }
 
 afterEach(() => {
@@ -27,7 +29,7 @@ afterEach(() => {
 describe('SettingsPage', () => {
   it('saves preferences and practice defaults that Practice Setup loads', async () => {
     const user = userEvent.setup()
-    const rendered = renderSettings()
+    const rendered = await renderSettings()
 
     await user.click(screen.getByRole('checkbox', { name: /Sound effects/i }))
     await user.click(screen.getByRole('checkbox', { name: 'Addition' }))
@@ -65,7 +67,7 @@ describe('SettingsPage', () => {
 
   it('requires at least one default operation', async () => {
     const user = userEvent.setup()
-    renderSettings()
+    await renderSettings()
 
     await user.click(screen.getByRole('checkbox', { name: 'Addition' }))
     await user.click(screen.getByRole('button', { name: 'Save Settings' }))
@@ -93,7 +95,7 @@ describe('SettingsPage', () => {
     }
     saveCompletedSession(session)
     vi.spyOn(window, 'confirm').mockReturnValue(true)
-    renderSettings()
+    await renderSettings()
 
     await user.click(
       screen.getByRole('button', { name: 'Clear All Application Data' }),

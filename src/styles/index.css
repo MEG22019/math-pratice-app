@@ -1249,6 +1249,14 @@ main {
   padding-block: 3rem;
 }
 
+.route-loading {
+  display: grid;
+  min-height: 45vh;
+  place-items: center;
+  color: #52677e;
+  font-weight: 700;
+}
+
 .session-transition {
   color: #607589;
   font-weight: 700;

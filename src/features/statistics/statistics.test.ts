@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import type { MistakePattern, PracticeAttempt } from '../../types'
-import { calculateAccuracy, calculateStatistics } from './statistics'
+import {
+  archiveAttempts,
+  calculateAccuracy,
+  calculateStatistics,
+  createEmptyStatisticsArchive,
+} from './statistics'
 
 function attempt(
   overrides: Partial<PracticeAttempt> & Pick<PracticeAttempt, 'id'>,
@@ -100,6 +105,31 @@ describe('statistics calculations', () => {
       activePatterns: 1,
       masteredPatterns: 1,
       similarQuestionsPracticed: 2,
+      correctReviewAnswers: 1,
+    })
+  })
+
+  it('combines compact archived totals with recent raw attempts', () => {
+    const archivedAttempts = [
+      attempt({ id: 'old-1', source: 'mistake-review' }),
+      attempt({ id: 'old-2', operation: 'division', isCorrect: false }),
+    ]
+    const archive = archiveAttempts(
+      createEmptyStatisticsArchive(),
+      archivedAttempts,
+    )
+    const statistics = calculateStatistics(
+      [attempt({ id: 'recent', difficulty: 4 })],
+      [],
+      archive,
+    )
+
+    expect(statistics).toMatchObject({ attempted: 3, correct: 2, incorrect: 1 })
+    expect(statistics.byOperation.addition.attempted).toBe(2)
+    expect(statistics.byOperation.division.incorrect).toBe(1)
+    expect(statistics.byDifficulty[4].attempted).toBe(1)
+    expect(statistics.mistakes).toMatchObject({
+      similarQuestionsPracticed: 1,
       correctReviewAnswers: 1,
     })
   })

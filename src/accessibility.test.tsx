@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import axe from 'axe-core'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
@@ -17,6 +17,10 @@ describe('application accessibility', () => {
         <AppRoutes />
       </MemoryRouter>,
     )
+
+    if (path === '/statistics' || path === '/settings') {
+      await screen.findByRole('heading', { name: _name })
+    }
 
     const results = await axe.run(container, {
       rules: {

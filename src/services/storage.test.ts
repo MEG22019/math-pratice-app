@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { generateQuestion } from '../features/questions'
+import { calculateStatistics } from '../features/statistics/statistics'
 import type {
   ApplicationSettings,
   PracticeAttempt,
@@ -10,13 +11,17 @@ import {
   clearActiveSession,
   clearAllApplicationData,
   defaultSettings,
+  getStorageUsage,
   initializeStorage,
   initializeStorageWithReport,
   loadActiveSession,
+  loadArchivedStatistics,
   loadAttempts,
   loadMistakePatterns,
   loadSessions,
   loadSettings,
+  MAX_STORED_ATTEMPTS,
+  MAX_STORED_SESSION_ATTEMPTS,
   MAX_STORED_SESSIONS,
   resetPracticeHistory,
   runStorageMigrations,
@@ -118,6 +123,10 @@ describe('storage initialization and settings', () => {
       JSON.stringify([{ id: 'invalid-attempt' }]),
     )
     localStorage.setItem(
+      storageKeys.archivedStatistics,
+      JSON.stringify({ attempted: -1 }),
+    )
+    localStorage.setItem(
       storageKeys.mistakePatterns,
       JSON.stringify([{ id: 'invalid-pattern' }]),
     )
@@ -132,6 +141,7 @@ describe('storage initialization and settings', () => {
       recoveredCategories: [
         'sessions',
         'attempts',
+        'archivedStatistics',
         'mistakePatterns',
         'activeSession',
       ],
@@ -193,6 +203,63 @@ describe('history persistence', () => {
 
     expect(loadSessions()).toHaveLength(MAX_STORED_SESSIONS)
     expect(loadSessions()[0].id).toBe(`session-${MAX_STORED_SESSIONS + 4}`)
+  })
+
+  it('caps large raw histories while preserving archived statistics', () => {
+    const sessionId = 'large-session'
+    const attempts: PracticeAttempt[] = Array.from(
+      { length: MAX_STORED_ATTEMPTS + 5 },
+      (_, index) => ({
+        id: `large-attempt-${index}`,
+        questionId: `large-question-${index}`,
+        sessionId,
+        operation: 'addition',
+        firstOperand: 2,
+        secondOperand: 3,
+        correctAnswer: 5,
+        selectedAnswer: 5,
+        isCorrect: true,
+        difficulty: 1,
+        source: 'regular',
+        timestamp: new Date(Date.UTC(2026, 0, 1, 0, 0, 0, index)).toISOString(),
+      }),
+    )
+    const session: PracticeSession = {
+      id: sessionId,
+      startedAt: attempts[0].timestamp,
+      completedAt: attempts.at(-1)!.timestamp,
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 'continuous',
+      mode: 'regular',
+      attemptedCount: attempts.length,
+      correctCount: attempts.length,
+      incorrectCount: 0,
+      attempts,
+    }
+
+    expect(saveCompletedSession(session)).toBe(true)
+
+    const rawAttempts = loadAttempts()
+    const archive = loadArchivedStatistics()
+    expect(rawAttempts).toHaveLength(MAX_STORED_ATTEMPTS)
+    expect(loadSessions()[0].attempts).toHaveLength(MAX_STORED_SESSION_ATTEMPTS)
+    expect(archive).toMatchObject({ attempted: 5, correct: 5, incorrect: 0 })
+    expect(calculateStatistics(rawAttempts, [], archive)).toMatchObject({
+      attempted: MAX_STORED_ATTEMPTS + 5,
+      correct: MAX_STORED_ATTEMPTS + 5,
+      incorrect: 0,
+    })
+  })
+
+  it('measures application storage usage', () => {
+    initializeStorage()
+    saveCompletedSession(createCompletedSession())
+
+    const usage = getStorageUsage()
+
+    expect(usage?.bytes).toBeGreaterThan(0)
+    expect(usage?.kilobytes).toBeGreaterThan(0)
   })
 
   it('resets practice history while preserving settings', () => {
@@ -322,5 +389,37 @@ describe('storage failure handling', () => {
     expect(runStorageMigrations()).toBe(false)
     expect(localStorage.getItem(storageKeys.version)).toBe('99')
     expect(localStorage.getItem('unrelated-key')).toBe('keep-me')
+  })
+
+  it('migrates version 1 data with an empty statistics archive', () => {
+    localStorage.setItem(storageKeys.version, JSON.stringify(1))
+    localStorage.setItem(storageKeys.settings, JSON.stringify(defaultSettings))
+    localStorage.setItem(storageKeys.sessions, JSON.stringify([]))
+    localStorage.setItem(storageKeys.attempts, JSON.stringify([]))
+    localStorage.setItem(storageKeys.mistakePatterns, JSON.stringify([]))
+
+    expect(runStorageMigrations()).toBe(true)
+    expect(JSON.parse(localStorage.getItem(storageKeys.version)!)).toBe(
+      STORAGE_VERSION,
+    )
+    expect(loadArchivedStatistics()).toEqual({
+      attempted: 0,
+      correct: 0,
+      incorrect: 0,
+      byOperation: {
+        addition: { attempted: 0, correct: 0, incorrect: 0 },
+        subtraction: { attempted: 0, correct: 0, incorrect: 0 },
+        multiplication: { attempted: 0, correct: 0, incorrect: 0 },
+        division: { attempted: 0, correct: 0, incorrect: 0 },
+      },
+      byDifficulty: {
+        1: { attempted: 0, correct: 0, incorrect: 0 },
+        2: { attempted: 0, correct: 0, incorrect: 0 },
+        3: { attempted: 0, correct: 0, incorrect: 0 },
+        4: { attempted: 0, correct: 0, incorrect: 0 },
+      },
+      reviewAttempted: 0,
+      reviewCorrect: 0,
+    })
   })
 })

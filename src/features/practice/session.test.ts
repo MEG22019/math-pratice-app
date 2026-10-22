@@ -126,6 +126,28 @@ describe('practice session state', () => {
     expect(state.session.completedAt).toBe('2026-01-02T00:00:00.000Z')
   })
 
+  it('keeps a long continuous-practice interaction loop responsive', () => {
+    const createQuestion = createQuestionFactory()
+    const dependencies = {
+      createQuestion,
+      createAttemptId: () => 'performance-attempt',
+      now: () => '2026-01-01T00:00:00.000Z',
+    }
+    let state = createPracticeSessionState(
+      { ...fixedConfiguration, sessionLength: 'continuous' },
+      dependencies,
+    )
+    const startedAt = performance.now()
+
+    for (let index = 0; index < 500; index += 1) {
+      state = recordPracticeResult(state, 4, true, dependencies)
+    }
+
+    expect(performance.now() - startedAt).toBeLessThan(1_500)
+    expect(state.session.attemptedCount).toBe(500)
+    expect(createQuestion).toHaveBeenCalledTimes(501)
+  })
+
   it('passes all selected operations to every mixed-session generation', () => {
     const createQuestion = createQuestionFactory()
     const configuration: PracticeSetupConfiguration = {

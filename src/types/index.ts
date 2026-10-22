@@ -85,6 +85,13 @@ export interface StatisticsTotals {
   incorrect: number
 }
 
+export interface PracticeStatisticsArchive extends StatisticsTotals {
+  byOperation: OperationStatistics
+  byDifficulty: DifficultyStatistics
+  reviewAttempted: number
+  reviewCorrect: number
+}
+
 export type OperationStatistics = Record<MathOperation, StatisticsTotals>
 
 export type DifficultyStatistics = Record<DifficultyLevel, StatisticsTotals>

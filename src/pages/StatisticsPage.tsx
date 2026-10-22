@@ -6,6 +6,7 @@ import { ErrorPanel } from '../components/ui/ErrorPanel'
 import {
   calculateAccuracy,
   calculateStatistics,
+  createEmptyStatisticsArchive,
 } from '../features/statistics/statistics'
 import {
   formatMistakeFact,
@@ -13,6 +14,7 @@ import {
   getFrequentlyMissedOperations,
 } from '../features/mistakes/mistakes'
 import {
+  loadArchivedStatistics,
   loadAttempts,
   loadMistakePatterns,
   loadSettings,
@@ -46,6 +48,10 @@ const difficultyLabels: Record<DifficultyLevel, string> = {
   3: 'Intermediate',
   4: 'Advanced',
 }
+
+const operations = Object.keys(operationLabels) as MathOperation[]
+const difficulties = [1, 2, 3, 4] as DifficultyLevel[]
+const MAX_RECENT_SESSIONS = 10
 
 function MetricGroup({ totals }: { totals: StatisticsTotals }) {
   return (
@@ -81,6 +87,9 @@ function formatSessionDate(session: PracticeSession): string {
 export function StatisticsPage() {
   const [settings] = useState(loadSettings)
   const [attempts, setAttempts] = useState(loadAttempts)
+  const [archivedStatistics, setArchivedStatistics] = useState(
+    loadArchivedStatistics,
+  )
   const [sessions, setSessions] = useState(() =>
     loadSessions()
       .sort(
@@ -88,7 +97,7 @@ export function StatisticsPage() {
           Date.parse(second.completedAt ?? second.startedAt) -
           Date.parse(first.completedAt ?? first.startedAt),
       )
-      .slice(0, 10),
+      .slice(0, MAX_RECENT_SESSIONS),
   )
   const [mistakePatterns, setMistakePatterns] = useState(loadMistakePatterns)
   const [mistakeView, setMistakeView] = useState<'active' | 'mastered'>(
@@ -96,8 +105,23 @@ export function StatisticsPage() {
   )
   const [storageError, setStorageError] = useState('')
   const statistics = useMemo(
-    () => calculateStatistics(attempts, mistakePatterns),
-    [attempts, mistakePatterns],
+    () => calculateStatistics(attempts, mistakePatterns, archivedStatistics),
+    [archivedStatistics, attempts, mistakePatterns],
+  )
+  const frequentOperations = useMemo(
+    () => getFrequentlyMissedOperations(mistakePatterns),
+    [mistakePatterns],
+  )
+  const frequentFacts = useMemo(
+    () => getFrequentlyMissedFacts(mistakePatterns),
+    [mistakePatterns],
+  )
+  const visiblePatterns = useMemo(
+    () =>
+      mistakePatterns.filter(
+        (pattern) => pattern.isMastered === (mistakeView === 'mastered'),
+      ),
+    [mistakePatterns, mistakeView],
   )
 
   function resetStatistics() {
@@ -111,6 +135,7 @@ export function StatisticsPage() {
 
     if (resetPracticeHistory()) {
       setAttempts([])
+      setArchivedStatistics(createEmptyStatisticsArchive())
       setSessions([])
       setMistakePatterns([])
     } else {
@@ -119,14 +144,6 @@ export function StatisticsPage() {
       )
     }
   }
-
-  const operations = Object.keys(operationLabels) as MathOperation[]
-  const difficulties = [1, 2, 3, 4] as DifficultyLevel[]
-  const frequentOperations = getFrequentlyMissedOperations(mistakePatterns)
-  const frequentFacts = getFrequentlyMissedFacts(mistakePatterns)
-  const visiblePatterns = mistakePatterns.filter(
-    (pattern) => pattern.isMastered === (mistakeView === 'mastered'),
-  )
 
   return (
     <PageContainer className="statistics-page">

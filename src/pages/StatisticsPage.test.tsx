@@ -59,12 +59,14 @@ function createSession(
   }
 }
 
-function renderStatistics() {
-  return render(
+async function renderStatistics() {
+  const rendered = render(
     <MemoryRouter initialEntries={['/statistics']}>
       <AppRoutes />
     </MemoryRouter>,
   )
+  await screen.findByRole('heading', { name: 'Statistics' })
+  return rendered
 }
 
 afterEach(() => {
@@ -72,15 +74,15 @@ afterEach(() => {
 })
 
 describe('StatisticsPage', () => {
-  it('shows a useful empty state when no questions were attempted', () => {
-    renderStatistics()
+  it('shows a useful empty state when no questions were attempted', async () => {
+    await renderStatistics()
 
     expect(
       screen.getByRole('heading', { name: 'Your progress starts here' }),
     ).toBeInTheDocument()
   })
 
-  it('displays totals, every breakdown category, and newest sessions first', () => {
+  it('displays totals, every breakdown category, and newest sessions first', async () => {
     saveCompletedSession(
       createSession('older', '2026-01-01T12:00:00.000Z', 'addition', 1, true),
     )
@@ -88,7 +90,7 @@ describe('StatisticsPage', () => {
       createSession('newer', '2026-02-01T12:00:00.000Z', 'division', 4, false),
     )
 
-    renderStatistics()
+    await renderStatistics()
 
     const overall = screen.getByRole('heading', { name: 'Your totals' })
       .nextElementSibling as HTMLElement
@@ -139,7 +141,7 @@ describe('StatisticsPage', () => {
       ),
     )
     vi.spyOn(window, 'confirm').mockReturnValue(true)
-    renderStatistics()
+    await renderStatistics()
 
     await user.click(screen.getByRole('button', { name: 'Reset Statistics' }))
 
@@ -188,7 +190,7 @@ describe('StatisticsPage', () => {
         isMastered: true,
       },
     ])
-    renderStatistics()
+    await renderStatistics()
 
     expect(
       screen.getByRole('heading', { name: 'Mistake progress' }),
