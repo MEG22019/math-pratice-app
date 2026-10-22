@@ -38,26 +38,26 @@
 
 ### 4. Create Shared Layout
 
-- [ ] Create the application shell/layout.
-- [ ] Create a reusable page container.
-- [ ] Create the application header/title.
-- [ ] Create reusable buttons and shared UI styles.
-- [ ] Create a child-friendly visual theme.
+- [x] Create the application shell/layout.
+- [x] Create a reusable page container.
+- [x] Create the application header/title.
+- [x] Create reusable buttons and shared UI styles.
+- [x] Create a child-friendly visual theme.
 
 ### 5. Add Navigation and Routing
 
-- [ ] Install/configure React Router.
-- [ ] Add routes for Home, Practice Setup, Practice Session, Session Summary, Statistics, and Settings.
-- [ ] Add main navigation.
-- [ ] Handle unknown routes safely.
+- [x] Install/configure React Router.
+- [x] Add routes for Home, Practice Setup, Practice Session, Session Summary, Statistics, and Settings.
+- [x] Add main navigation.
+- [x] Handle unknown routes safely.
 
 ### 6. Build the Home Page
 
-- [ ] Add Start Practice.
-- [ ] Add View Statistics.
-- [ ] Add Settings.
-- [ ] Wire Home page actions to the correct routes.
-- [ ] Make the interface attractive for children ages 7–12.
+- [x] Add Start Practice.
+- [x] Add View Statistics.
+- [x] Add Settings.
+- [x] Wire Home page actions to the correct routes.
+- [x] Make the interface attractive for children ages 7–12.
 
 ## Phase 3: Practice Setup
 
