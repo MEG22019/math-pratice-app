@@ -66,13 +66,21 @@ export function SettingsPage() {
       'Clear ALL application data? This permanently removes settings, sessions, attempts, progress, mistake patterns, and any active session.',
     )
 
-    if (confirmed && clearAllApplicationData()) {
+    if (!confirmed) {
+      return
+    }
+
+    if (clearAllApplicationData()) {
       setSettings({
         ...defaultSettings,
         defaultOperations: [...defaultSettings.defaultOperations],
       })
       setMasteryThreshold(String(defaultSettings.mistakeMasteryThreshold))
       navigate('/', { replace: true })
+    } else {
+      setSaveMessage(
+        'We could not clear the saved data. Please check your browser storage settings and try again.',
+      )
     }
   }
 

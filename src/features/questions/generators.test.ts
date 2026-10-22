@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type {
   DifficultyLevel,
@@ -187,12 +187,18 @@ describe('main question generator', () => {
   })
 
   it('falls back safely after repeated generation failures', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const question = generateQuestion('addition', 1, {
       random: () => Number.NaN,
     })
 
     expect(question.operation).toBe('addition')
     expect(validateQuestion(question)).toBe(true)
+    expect(warning).toHaveBeenCalledWith(
+      expect.stringContaining('safe fallback'),
+      { difficulty: 1, operation: 'addition' },
+    )
+    warning.mockRestore()
   })
 })
 

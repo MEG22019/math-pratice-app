@@ -230,18 +230,67 @@ const generators: Record<MathOperation, OperationGenerator> = {
   division: generateDivisionQuestion,
 }
 
-function fallbackQuestion(
+export const QUESTION_GENERATION_MAX_ATTEMPTS = 25
+
+const knownGoodFacts: Record<
+  MathOperation,
+  Record<DifficultyLevel, readonly [number, number, number]>
+> = {
+  addition: {
+    1: [4, 3, 7],
+    2: [24, 15, 39],
+    3: [125, 75, 200],
+    4: [750, 250, 1_000],
+  },
+  subtraction: {
+    1: [8, 3, 5],
+    2: [62, 17, 45],
+    3: [325, 125, 200],
+    4: [250, 725, -475],
+  },
+  multiplication: {
+    1: [4, 3, 12],
+    2: [8, 7, 56],
+    3: [6, 24, 144],
+    4: [25, 16, 400],
+  },
+  division: {
+    1: [12, 3, 4],
+    2: [56, 7, 8],
+    3: [144, 6, 24],
+    4: [600, 20, 30],
+  },
+}
+
+function knownGoodFallbackQuestion(
   operation: MathOperation,
   difficulty: DifficultyLevel,
   options: GeneratorOptions,
 ): Question {
-  const safeOptions = {
-    ...options,
-    random: () => 0.5,
-    idFactory: options.idFactory ?? (() => createId('question')),
+  const [firstOperand, secondOperand, correctAnswer] =
+    knownGoodFacts[operation][difficulty]
+  const question: Question = {
+    id: createId('question'),
+    operation,
+    firstOperand,
+    secondOperand,
+    displayText: `${firstOperand} ${operationSymbols[operation]} ${secondOperand}`,
+    correctAnswer,
+    choices: [
+      correctAnswer - 1,
+      correctAnswer,
+      correctAnswer + 1,
+      correctAnswer + 2,
+    ],
+    difficulty,
+    source: options.source ?? 'regular',
   }
 
-  return generators[operation](difficulty, safeOptions)
+  if (options.mistakePatternId) {
+    question.mistakePatternId = options.mistakePatternId
+  }
+
+  return question
 }
 
 export function generateQuestion(
@@ -253,7 +302,11 @@ export function generateQuestion(
     ? requestedOperations
     : [requestedOperations]
 
-  if (operations.length === 0) {
+  const validOperations = operations.filter(
+    (operation): operation is MathOperation => operation in generators,
+  )
+
+  if (validOperations.length === 0) {
     throw new Error('At least one operation is required.')
   }
 
@@ -261,12 +314,17 @@ export function generateQuestion(
   let operation: MathOperation
 
   try {
-    operation = operations[randomInteger(0, operations.length - 1, random)]
+    operation =
+      validOperations[randomInteger(0, validOperations.length - 1, random)]
   } catch {
-    operation = operations[0]
+    operation = validOperations[0]
   }
 
-  for (let attempt = 0; attempt < 25; attempt += 1) {
+  for (
+    let attempt = 0;
+    attempt < QUESTION_GENERATION_MAX_ATTEMPTS;
+    attempt += 1
+  ) {
     try {
       const question = generators[operation](difficulty, options)
 
@@ -278,7 +336,14 @@ export function generateQuestion(
     }
   }
 
-  const question = fallbackQuestion(operation, difficulty, options)
+  if (import.meta.env.DEV) {
+    console.warn(
+      `Question generation needed its safe fallback after ${QUESTION_GENERATION_MAX_ATTEMPTS} attempts.`,
+      { difficulty, operation },
+    )
+  }
+
+  const question = knownGoodFallbackQuestion(operation, difficulty, options)
 
   if (!validateQuestion(question)) {
     throw new Error('Unable to generate a valid question.')

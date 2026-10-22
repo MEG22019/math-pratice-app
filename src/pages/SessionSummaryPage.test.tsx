@@ -97,6 +97,31 @@ describe('SessionSummaryPage', () => {
     expect(
       within(card!).getByRole('link', { name: 'Start Practice' }),
     ).toHaveAttribute('href', '/practice/setup')
+    expect(
+      within(card!).getByRole('link', { name: 'Return Home' }),
+    ).toHaveAttribute('href', '/')
+  })
+
+  it('shows an in-memory summary when browser storage fails', () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: '/practice/summary',
+            state: { session: createSession(), storageError: true },
+          },
+        ]}
+      >
+        <AppRoutes />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getByRole('heading', { name: 'Session Summary' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'This result could not be saved' }),
+    ).toBeInTheDocument()
   })
 
   it('starts mistake practice when an active saved pattern exists', async () => {

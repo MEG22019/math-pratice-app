@@ -11,6 +11,7 @@ import {
   clearAllApplicationData,
   defaultSettings,
   initializeStorage,
+  initializeStorageWithReport,
   loadActiveSession,
   loadAttempts,
   loadMistakePatterns,
@@ -105,6 +106,59 @@ describe('storage initialization and settings', () => {
 
     expect(saveSettings(settings)).toBe(true)
     expect(loadSettings()).toEqual(settings)
+  })
+
+  it('repairs invalid categories independently and reports the recovery', () => {
+    expect(initializeStorage()).toBe(true)
+    const validSettings = { ...defaultSettings, defaultDifficulty: 4 as const }
+    saveSettings(validSettings)
+    localStorage.setItem(storageKeys.sessions, '{broken json')
+    localStorage.setItem(
+      storageKeys.attempts,
+      JSON.stringify([{ id: 'invalid-attempt' }]),
+    )
+    localStorage.setItem(
+      storageKeys.mistakePatterns,
+      JSON.stringify([{ id: 'invalid-pattern' }]),
+    )
+    localStorage.setItem(
+      storageKeys.activeSession,
+      JSON.stringify({ session: 'invalid' }),
+    )
+
+    const report = initializeStorageWithReport()
+
+    expect(report).toEqual({
+      recoveredCategories: [
+        'sessions',
+        'attempts',
+        'mistakePatterns',
+        'activeSession',
+      ],
+      storageAvailable: true,
+      succeeded: true,
+    })
+    expect(loadSettings()).toEqual(validSettings)
+    expect(loadSessions()).toEqual([])
+    expect(loadAttempts()).toEqual([])
+    expect(loadMistakePatterns()).toEqual([])
+    expect(localStorage.getItem(storageKeys.activeSession)).toBeNull()
+  })
+
+  it('recovers invalid settings without clearing valid history', () => {
+    expect(initializeStorage()).toBe(true)
+    const session = createCompletedSession()
+    saveCompletedSession(session)
+    localStorage.setItem(
+      storageKeys.settings,
+      JSON.stringify({ defaultDifficulty: 99 }),
+    )
+
+    const report = initializeStorageWithReport()
+
+    expect(report.recoveredCategories).toEqual(['settings'])
+    expect(loadSettings()).toEqual(defaultSettings)
+    expect(loadSessions()).toEqual([session])
   })
 })
 
@@ -216,6 +270,30 @@ describe('active-session persistence', () => {
     )
 
     expect(loadActiveSession()).toBeUndefined()
+  })
+
+  it('rejects completed and internally inconsistent active snapshots', () => {
+    const completedSession = createCompletedSession()
+    const currentQuestion = generateQuestion('addition', 1)
+
+    expect(
+      saveActiveSession({
+        session: completedSession,
+        currentQuestion,
+        selectedAnswer: null,
+        isRevealed: false,
+      }),
+    ).toBe(false)
+
+    delete completedSession.completedAt
+    expect(
+      saveActiveSession({
+        session: { ...completedSession, difficulty: 2 },
+        currentQuestion,
+        selectedAnswer: null,
+        isRevealed: false,
+      }),
+    ).toBe(false)
   })
 })
 

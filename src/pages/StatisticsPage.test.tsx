@@ -22,15 +22,22 @@ function createSession(
   difficulty: PracticeAttempt['difficulty'],
   isCorrect: boolean,
 ): PracticeSession {
+  const operands = {
+    addition: [2, 2, 4],
+    subtraction: [6, 2, 4],
+    multiplication: [2, 2, 4],
+    division: [8, 2, 4],
+  } as const
+  const [firstOperand, secondOperand, correctAnswer] = operands[operation]
   const attempt: PracticeAttempt = {
     id: `attempt-${id}`,
     questionId: `question-${id}`,
     sessionId: id,
     operation,
-    firstOperand: 8,
-    secondOperand: 2,
-    correctAnswer: 4,
-    selectedAnswer: isCorrect ? 4 : 5,
+    firstOperand,
+    secondOperand,
+    correctAnswer,
+    selectedAnswer: isCorrect ? correctAnswer : correctAnswer + 1,
     isCorrect,
     difficulty,
     source: 'regular',

@@ -39,6 +39,13 @@ export const defaultSettings: ApplicationSettings = {
 }
 
 type StorageCategory = keyof typeof storageKeys
+export type RecoverableStorageCategory = Exclude<StorageCategory, 'version'>
+
+export interface StorageInitializationReport {
+  recoveredCategories: RecoverableStorageCategory[]
+  storageAvailable: boolean
+  succeeded: boolean
+}
 
 function getBrowserStorage(): Storage | null {
   try {
@@ -73,6 +80,23 @@ function isPracticeMode(value: unknown): value is PracticeMode {
   return value === 'regular' || value === 'mistake-review'
 }
 
+export function isPracticeSetupConfiguration(value: unknown): value is {
+  operations: MathOperation[]
+  difficulty: DifficultyLevel
+  sessionLength: SessionLength
+  mode: PracticeMode
+} {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.operations) &&
+    value.operations.length > 0 &&
+    value.operations.every(isMathOperation) &&
+    isDifficulty(value.difficulty) &&
+    isSessionLength(value.sessionLength) &&
+    isPracticeMode(value.mode)
+  )
+}
+
 function isQuestionSource(value: unknown): value is QuestionSource {
   return value === 'regular' || value === 'mistake-review'
 }
@@ -83,6 +107,28 @@ function isDateString(value: unknown): value is string {
 
 function isNonnegativeInteger(value: unknown): value is number {
   return Number.isInteger(value) && Number(value) >= 0
+}
+
+function hasValidArithmetic(
+  operation: MathOperation,
+  firstOperand: number,
+  secondOperand: number,
+  correctAnswer: number,
+): boolean {
+  switch (operation) {
+    case 'addition':
+      return correctAnswer === firstOperand + secondOperand
+    case 'subtraction':
+      return correctAnswer === firstOperand - secondOperand
+    case 'multiplication':
+      return correctAnswer === firstOperand * secondOperand
+    case 'division':
+      return (
+        secondOperand !== 0 &&
+        Number.isInteger(correctAnswer) &&
+        correctAnswer === firstOperand / secondOperand
+      )
+  }
 }
 
 export function isPracticeAttempt(value: unknown): value is PracticeAttempt {
@@ -102,6 +148,12 @@ export function isPracticeAttempt(value: unknown): value is PracticeAttempt {
     typeof value.isCorrect === 'boolean' &&
     isDifficulty(value.difficulty) &&
     isQuestionSource(value.source) &&
+    hasValidArithmetic(
+      value.operation,
+      Number(value.firstOperand),
+      Number(value.secondOperand),
+      Number(value.correctAnswer),
+    ) &&
     isDateString(value.timestamp) &&
     (value.mistakePatternId === undefined ||
       typeof value.mistakePatternId === 'string')
@@ -109,29 +161,40 @@ export function isPracticeAttempt(value: unknown): value is PracticeAttempt {
 }
 
 export function isPracticeSession(value: unknown): value is PracticeSession {
-  if (!isRecord(value) || !Array.isArray(value.attempts)) {
+  if (
+    !isRecord(value) ||
+    !Array.isArray(value.attempts) ||
+    !Array.isArray(value.operations) ||
+    !value.operations.every(isMathOperation) ||
+    !isPracticeMode(value.mode)
+  ) {
     return false
   }
 
   const attempts = value.attempts
+  const operations = value.operations
+  const expectedSource = value.mode === 'regular' ? 'regular' : 'mistake-review'
 
   return (
     typeof value.id === 'string' &&
     isDateString(value.startedAt) &&
     (value.completedAt === undefined || isDateString(value.completedAt)) &&
-    Array.isArray(value.operations) &&
-    value.operations.length > 0 &&
-    value.operations.every(isMathOperation) &&
+    operations.length > 0 &&
     isDifficulty(value.difficulty) &&
     isSessionLength(value.sessionLength) &&
-    isPracticeMode(value.mode) &&
     isNonnegativeInteger(value.attemptedCount) &&
     isNonnegativeInteger(value.correctCount) &&
     isNonnegativeInteger(value.incorrectCount) &&
     attempts.every(isPracticeAttempt) &&
     value.attemptedCount === attempts.length &&
     value.correctCount + value.incorrectCount === value.attemptedCount &&
-    attempts.every((attempt) => attempt.sessionId === value.id)
+    attempts.every(
+      (attempt) =>
+        attempt.sessionId === value.id &&
+        operations.includes(attempt.operation) &&
+        attempt.difficulty === value.difficulty &&
+        attempt.source === expectedSource,
+    )
   )
 }
 
@@ -146,6 +209,12 @@ function isMistakePattern(value: unknown): value is MistakePattern {
     Number.isInteger(value.firstOperand) &&
     Number.isInteger(value.secondOperand) &&
     Number.isInteger(value.correctAnswer) &&
+    hasValidArithmetic(
+      value.operation,
+      Number(value.firstOperand),
+      Number(value.secondOperand),
+      Number(value.correctAnswer),
+    ) &&
     isDifficulty(value.difficulty) &&
     isNonnegativeInteger(value.incorrectCount) &&
     isNonnegativeInteger(value.similarCorrectCount) &&
@@ -243,8 +312,115 @@ export function runStorageMigrations(storage = getBrowserStorage()): boolean {
   return false
 }
 
+function isValidSettings(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return (
+    typeof value.soundEffectsEnabled === 'boolean' &&
+    typeof value.cardAnimationEnabled === 'boolean' &&
+    typeof value.showExplanations === 'boolean' &&
+    typeof value.encouragingFeedbackEnabled === 'boolean' &&
+    Number.isInteger(value.mistakeMasteryThreshold) &&
+    Number(value.mistakeMasteryThreshold) > 0 &&
+    Number(value.mistakeMasteryThreshold) <= 10 &&
+    Array.isArray(value.defaultOperations) &&
+    value.defaultOperations.length > 0 &&
+    value.defaultOperations.every(isMathOperation) &&
+    isDifficulty(value.defaultDifficulty) &&
+    isSessionLength(value.defaultSessionLength)
+  )
+}
+
+export function initializeStorageWithReport(
+  storage = getBrowserStorage(),
+): StorageInitializationReport {
+  const report: StorageInitializationReport = {
+    recoveredCategories: [],
+    storageAvailable: storage !== null,
+    succeeded: false,
+  }
+
+  if (!storage || !runStorageMigrations(storage)) {
+    return report
+  }
+
+  const definitions: Array<{
+    category: RecoverableStorageCategory
+    fallback?: unknown
+    validate: (value: unknown) => boolean
+  }> = [
+    {
+      category: 'settings',
+      fallback: defaultSettings,
+      validate: isValidSettings,
+    },
+    {
+      category: 'sessions',
+      fallback: [],
+      validate: (value) =>
+        Array.isArray(value) && value.every(isPracticeSession),
+    },
+    {
+      category: 'attempts',
+      fallback: [],
+      validate: (value) =>
+        Array.isArray(value) && value.every(isPracticeAttempt),
+    },
+    {
+      category: 'mistakePatterns',
+      fallback: [],
+      validate: (value) =>
+        Array.isArray(value) && value.every(isMistakePattern),
+    },
+    {
+      category: 'activeSession',
+      validate: isActiveSessionSnapshot,
+    },
+    {
+      category: 'lastSummarySessionId',
+      validate: (value) => typeof value === 'string',
+    },
+  ]
+
+  for (const { category, fallback, validate } of definitions) {
+    let rawValue: string | null
+    try {
+      rawValue = storage.getItem(storageKeys[category])
+    } catch {
+      return report
+    }
+
+    if (rawValue === null) {
+      continue
+    }
+
+    let value: unknown
+    try {
+      value = JSON.parse(rawValue)
+    } catch {
+      value = undefined
+    }
+
+    if (!validate(value)) {
+      const recovered =
+        fallback === undefined
+          ? safeRemove(category, storage)
+          : safeWrite(category, fallback, storage)
+      if (!recovered) {
+        return report
+      }
+      report.recoveredCategories.push(category)
+    }
+  }
+
+  report.succeeded = true
+  return report
+}
+
 export function initializeStorage(storage = getBrowserStorage()): boolean {
-  return runStorageMigrations(storage)
+  return initializeStorageWithReport(storage).succeeded
 }
 
 export function sanitizeSettings(value: unknown): ApplicationSettings {
@@ -278,7 +454,8 @@ export function sanitizeSettings(value: unknown): ApplicationSettings {
         : defaultSettings.encouragingFeedbackEnabled,
     mistakeMasteryThreshold:
       Number.isInteger(value.mistakeMasteryThreshold) &&
-      Number(value.mistakeMasteryThreshold) > 0
+      Number(value.mistakeMasteryThreshold) > 0 &&
+      Number(value.mistakeMasteryThreshold) <= 10
         ? Number(value.mistakeMasteryThreshold)
         : defaultSettings.mistakeMasteryThreshold,
     defaultOperations:
@@ -386,6 +563,7 @@ export function isActiveSessionSnapshot(
 
   if (
     !isPracticeSession(value.session) ||
+    value.session.completedAt !== undefined ||
     !isRecord(value.currentQuestion) ||
     typeof value.isRevealed !== 'boolean' ||
     !(value.selectedAnswer === null || Number.isInteger(value.selectedAnswer))
@@ -397,6 +575,12 @@ export function isActiveSessionSnapshot(
     const question = value.currentQuestion as unknown as Question
     return (
       validateQuestion(question) &&
+      question.difficulty === value.session.difficulty &&
+      value.session.operations.includes(question.operation) &&
+      question.source ===
+        (value.session.mode === 'regular' ? 'regular' : 'mistake-review') &&
+      (value.session.sessionLength === 'continuous' ||
+        value.session.attemptedCount < value.session.sessionLength) &&
       (value.selectedAnswer === null ||
         question.choices.includes(Number(value.selectedAnswer))) &&
       (!value.isRevealed || value.selectedAnswer !== null)

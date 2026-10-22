@@ -1,10 +1,17 @@
-import { useEffect, useState } from 'react'
+import {
+  Component,
+  useEffect,
+  useState,
+  type ErrorInfo,
+  type ReactNode,
+} from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { PageContainer } from '../components/layout/PageContainer'
 import { QuestionCard } from '../components/practice/QuestionCard'
 import type { QuestionCardState } from '../components/practice/QuestionCard'
 import { Button, ButtonLink } from '../components/ui/Button'
+import { ErrorPanel } from '../components/ui/ErrorPanel'
 import {
   createPracticeSessionState,
   endPracticeSession,
@@ -23,6 +30,7 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { getEncouragingMessage, playResultSound } from '../services/feedback'
 import {
   clearActiveSession,
+  isPracticeSetupConfiguration,
   loadActiveSession,
   loadMistakePatterns,
   loadSettings,
@@ -36,7 +44,7 @@ import type {
 } from '../types'
 
 interface PracticeSessionLocationState {
-  configuration?: PracticeSetupConfiguration
+  configuration?: unknown
 }
 
 const operationLabels = {
@@ -58,11 +66,56 @@ interface ActivePracticeSessionProps {
   restoredSnapshot?: ActiveSessionSnapshot
 }
 
+class PracticeSessionErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    if (import.meta.env.DEV) {
+      console.error('Practice session could not create a question.', {
+        message: error.message,
+        componentStack: errorInfo.componentStack,
+      })
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <PageContainer className="placeholder-page">
+          <ErrorPanel
+            headingLevel={1}
+            title="We could not make the next question"
+            message="That question did not load correctly. Your saved progress is safe—choose your practice options and try again."
+            actions={
+              <>
+                <ButtonLink to="/practice/setup">Try Practice Again</ButtonLink>
+                <ButtonLink to="/" variant="secondary">
+                  Return Home
+                </ButtonLink>
+              </>
+            }
+          />
+        </PageContainer>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
 function ActivePracticeSession({
   configuration,
   restoredSnapshot,
 }: ActivePracticeSessionProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const prefersReducedMotion = usePrefersReducedMotion()
   const [settings] = useState(loadSettings)
   const sessionConfiguration = configuration ?? {
@@ -104,6 +157,10 @@ function ActivePracticeSession({
     isRevealed: restoredSnapshot?.isRevealed ?? false,
   }))
   const [feedbackMessage, setFeedbackMessage] = useState('')
+  const [storageError, setStorageError] = useState('')
+  const [pendingDestination, setPendingDestination] = useState<string | null>(
+    null,
+  )
   const { currentQuestion, isComplete, session } = state
   const isContinuous = session.sessionLength === 'continuous'
   const progressMaximum = isContinuous ? undefined : session.sessionLength
@@ -127,7 +184,11 @@ function ActivePracticeSession({
       isCorrect,
       settings.mistakeMasteryThreshold,
     )
-    saveMistakePatterns(updatedPatterns)
+    if (!saveMistakePatterns(updatedPatterns)) {
+      setStorageError(
+        'We could not save this result. You can keep practicing, but this progress may not return after a refresh.',
+      )
+    }
     setCardState({ selectedAnswer: null, isRevealed: false })
     setState((currentState) =>
       recordPracticeResult(
@@ -141,22 +202,119 @@ function ActivePracticeSession({
 
   useEffect(() => {
     if (isComplete) {
-      saveCompletedSession(session)
-      clearActiveSession()
+      const sessionSaved = saveCompletedSession(session)
+      const snapshotCleared = clearActiveSession()
       navigate('/practice/summary', {
         replace: true,
-        state: { sessionId: session.id },
+        state: {
+          session,
+          sessionId: session.id,
+          storageError: !sessionSaved || !snapshotCleared,
+        },
       })
       return
     }
 
-    saveActiveSession({
+    const snapshotSaved = saveActiveSession({
       session,
       currentQuestion,
       selectedAnswer: cardState.selectedAnswer,
       isRevealed: cardState.isRevealed,
     })
+    if (!snapshotSaved) {
+      const showStorageError = window.setTimeout(() => {
+        setStorageError(
+          'We could not save this session. You can keep practicing, but it may not return after a refresh.',
+        )
+      }, 0)
+      return () => window.clearTimeout(showStorageError)
+    }
   }, [cardState, currentQuestion, isComplete, navigate, session])
+
+  useEffect(() => {
+    if (isComplete) {
+      return
+    }
+
+    function warnBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', warnBeforeUnload)
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload)
+  }, [isComplete])
+
+  useEffect(() => {
+    if (isComplete) {
+      return
+    }
+
+    function guardApplicationNavigation(event: MouseEvent) {
+      if (
+        event.button !== 0 ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey
+      ) {
+        return
+      }
+
+      const target = event.target
+      const anchor =
+        target instanceof Element
+          ? target.closest<HTMLAnchorElement>('a')
+          : null
+      const href = anchor?.getAttribute('href')
+      if (
+        !anchor ||
+        !href ||
+        href.startsWith('#') ||
+        anchor.hasAttribute('download') ||
+        anchor.target === '_blank'
+      ) {
+        return
+      }
+
+      const destination = new URL(href, window.location.href)
+      if (
+        destination.origin !== window.location.origin ||
+        (destination.pathname === location.pathname &&
+          destination.search === location.search)
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      setPendingDestination(
+        `${destination.pathname}${destination.search}${destination.hash}`,
+      )
+    }
+
+    document.addEventListener('click', guardApplicationNavigation, true)
+    return () =>
+      document.removeEventListener('click', guardApplicationNavigation, true)
+  }, [isComplete, location.pathname, location.search])
+
+  function endSessionAndLeave() {
+    if (!pendingDestination) {
+      return
+    }
+
+    const completedSession = endPracticeSession(state).session
+    if (!saveCompletedSession(completedSession)) {
+      setStorageError(
+        'We could not save your session, so we kept you on this page to protect your progress. Please try again.',
+      )
+      setPendingDestination(null)
+      return
+    }
+
+    clearActiveSession()
+    navigate(pendingDestination)
+  }
 
   if (isComplete) {
     return (
@@ -168,6 +326,22 @@ function ActivePracticeSession({
 
   return (
     <PageContainer className="practice-session-page">
+      {storageError && (
+        <ErrorPanel
+          compact
+          title="Progress could not be saved"
+          message={storageError}
+          actions={
+            <Button
+              type="button"
+              variant="quiet"
+              onClick={() => setStorageError('')}
+            >
+              Dismiss
+            </Button>
+          }
+        />
+      )}
       <header className="session-header">
         <div>
           <p className="eyebrow">Practice Session</p>
@@ -248,14 +422,52 @@ function ActivePracticeSession({
           {feedbackMessage}
         </p>
       )}
+      {pendingDestination && (
+        <div className="dialog-backdrop">
+          <section
+            className="leave-session-dialog"
+            aria-labelledby="leave-session-title"
+            aria-modal="true"
+            role="alertdialog"
+          >
+            <span aria-hidden="true">✋</span>
+            <h2 id="leave-session-title">Leave this practice session?</h2>
+            <p>
+              Your session is still in progress. You can keep practicing or end
+              it safely before you leave.
+            </p>
+            <div>
+              <Button
+                autoFocus
+                type="button"
+                onClick={() => setPendingDestination(null)}
+              >
+                Keep Practicing
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={endSessionAndLeave}
+              >
+                End Session
+              </Button>
+            </div>
+          </section>
+        </div>
+      )}
     </PageContainer>
   )
 }
 
 export function PracticeSessionPage() {
   const location = useLocation()
-  const { configuration } = (location.state ??
+  const { configuration: configurationCandidate } = (location.state ??
     {}) as PracticeSessionLocationState
+  const configuration = isPracticeSetupConfiguration(configurationCandidate)
+    ? configurationCandidate
+    : undefined
+  const hasInvalidConfiguration =
+    configurationCandidate !== undefined && !configuration
   const [restoredSnapshot] = useState(() =>
     configuration ? undefined : loadActiveSession(),
   )
@@ -264,34 +476,47 @@ export function PracticeSessionPage() {
     configuration?.mode === 'mistake-review' &&
     getActiveMistakePatterns(loadMistakePatterns()).length === 0
 
-  if ((!configuration && !restoredSnapshot) || reviewIsUnavailable) {
+  if (
+    (!configuration && !restoredSnapshot) ||
+    reviewIsUnavailable ||
+    hasInvalidConfiguration
+  ) {
+    const title = reviewIsUnavailable
+      ? 'No active mistakes to review'
+      : hasInvalidConfiguration
+        ? 'That practice setup is not valid'
+        : 'No practice setup found'
+    const message = reviewIsUnavailable
+      ? 'Great work! Try regular practice to discover more skills to strengthen.'
+      : hasInvalidConfiguration
+        ? 'Something was missing from those practice choices. Pick your options again and we will get you started.'
+        : 'Choose your practice options before starting a session.'
+
     return (
       <PageContainer className="placeholder-page">
-        <section className="placeholder-card">
-          <div className="placeholder-card__symbol" aria-hidden="true">
-            🧭
-          </div>
-          <p className="eyebrow">Let’s get ready first</p>
-          <h1>
-            {reviewIsUnavailable
-              ? 'No active mistakes to review'
-              : 'No practice setup found'}
-          </h1>
-          <p>
-            {reviewIsUnavailable
-              ? 'Great work! Try regular practice to discover more skills to strengthen.'
-              : 'Choose your practice options before starting a session.'}
-          </p>
-          <ButtonLink to="/practice/setup">Go to Practice Setup</ButtonLink>
-        </section>
+        <ErrorPanel
+          headingLevel={1}
+          title={title}
+          message={message}
+          actions={
+            <>
+              <ButtonLink to="/practice/setup">Go to Practice Setup</ButtonLink>
+              <ButtonLink to="/" variant="secondary">
+                Return Home
+              </ButtonLink>
+            </>
+          }
+        />
       </PageContainer>
     )
   }
 
   return (
-    <ActivePracticeSession
-      configuration={configuration}
-      restoredSnapshot={restoredSnapshot}
-    />
+    <PracticeSessionErrorBoundary>
+      <ActivePracticeSession
+        configuration={configuration}
+        restoredSnapshot={restoredSnapshot}
+      />
+    </PracticeSessionErrorBoundary>
   )
 }

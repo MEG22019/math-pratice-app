@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
+import { storageKeys } from '../services/storage'
 import { AppRoutes } from './App'
 
 function renderRoute(route = '/') {
@@ -70,5 +71,16 @@ describe('App navigation', () => {
     expect(
       screen.getByRole('heading', { name: /math feels better/i }),
     ).toBeInTheDocument()
+  })
+
+  it('shows a friendly notice after repairing one damaged storage category', () => {
+    localStorage.setItem(storageKeys.sessions, '{broken json')
+
+    renderRoute()
+
+    expect(
+      screen.getByRole('heading', { name: 'We repaired some saved data' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/reset only that part/i)).toBeInTheDocument()
   })
 })

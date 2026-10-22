@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 
 import { PageContainer } from '../components/layout/PageContainer'
 import { Button, ButtonLink } from '../components/ui/Button'
+import { ErrorPanel } from '../components/ui/ErrorPanel'
 import {
   calculateAccuracy,
   calculateStatistics,
@@ -93,6 +94,7 @@ export function StatisticsPage() {
   const [mistakeView, setMistakeView] = useState<'active' | 'mastered'>(
     'active',
   )
+  const [storageError, setStorageError] = useState('')
   const statistics = useMemo(
     () => calculateStatistics(attempts, mistakePatterns),
     [attempts, mistakePatterns],
@@ -103,10 +105,18 @@ export function StatisticsPage() {
       'Reset all practice statistics and session history? Your Settings will stay the same. This cannot be undone.',
     )
 
-    if (confirmed && resetPracticeHistory()) {
+    if (!confirmed) {
+      return
+    }
+
+    if (resetPracticeHistory()) {
       setAttempts([])
       setSessions([])
       setMistakePatterns([])
+    } else {
+      setStorageError(
+        'We could not reset your statistics. Your saved progress is still here. Please check your browser storage settings and try again.',
+      )
     }
   }
 
@@ -128,6 +138,23 @@ export function StatisticsPage() {
         </div>
         <ButtonLink to="/practice/setup">Start Practice</ButtonLink>
       </header>
+
+      {storageError && (
+        <ErrorPanel
+          compact
+          title="Statistics could not be reset"
+          message={storageError}
+          actions={
+            <Button
+              type="button"
+              variant="quiet"
+              onClick={() => setStorageError('')}
+            >
+              Dismiss
+            </Button>
+          }
+        />
+      )}
 
       {statistics.attempted === 0 ? (
         <section className="statistics-empty" aria-labelledby="empty-title">

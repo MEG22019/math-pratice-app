@@ -1,5 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+
+import {
+  initializeStorageWithReport,
+  type StorageInitializationReport,
+} from '../../services/storage'
+import { Button } from '../ui/Button'
+import { ErrorPanel } from '../ui/ErrorPanel'
 
 const navigationItems = [
   { label: 'Home', to: '/', icon: '⌂' },
@@ -8,9 +15,20 @@ const navigationItems = [
   { label: 'Settings', to: '/settings', icon: '⚙' },
 ]
 
-export function AppShell() {
+interface AppShellProps {
+  storageInitializationReport?: StorageInitializationReport
+}
+
+export function AppShell({ storageInitializationReport }: AppShellProps) {
   const location = useLocation()
   const previousPath = useRef(location.pathname)
+  const [storageReport] = useState(
+    () => storageInitializationReport ?? initializeStorageWithReport(),
+  )
+  const [showStorageNotice, setShowStorageNotice] = useState(
+    () =>
+      !storageReport.succeeded || storageReport.recoveredCategories.length > 0,
+  )
   const routeName = location.pathname.startsWith('/practice/')
     ? 'Practice'
     : (navigationItems.find((item) => item.to === location.pathname)?.label ??
@@ -62,6 +80,32 @@ export function AppShell() {
         <p className="sr-only" aria-atomic="true" aria-live="polite">
           {routeName} page loaded.
         </p>
+        {showStorageNotice && (
+          <div className="app-notice">
+            <ErrorPanel
+              compact
+              title={
+                storageReport.succeeded
+                  ? 'We repaired some saved data'
+                  : 'Saved progress is unavailable'
+              }
+              message={
+                storageReport.succeeded
+                  ? 'Some saved data was damaged, so we safely reset only that part. Everything else is still here.'
+                  : 'We could not safely read or update saved progress. You can keep practicing, but progress may not survive a refresh.'
+              }
+              actions={
+                <Button
+                  type="button"
+                  variant="quiet"
+                  onClick={() => setShowStorageNotice(false)}
+                >
+                  Dismiss
+                </Button>
+              }
+            />
+          </div>
+        )}
         <Outlet />
       </main>
 

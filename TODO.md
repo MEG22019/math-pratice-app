@@ -581,40 +581,40 @@
 
 ### 75. Protect Against Accidental Navigation
 
-- [ ] Warn before navigating away from an active session.
-- [ ] Provide **Keep Practicing** and **End Session** choices.
-- [ ] Register a browser unload warning while practice is active.
-- [ ] Disable warnings after the session ends.
+- [x] Warn before navigating away from an active session.
+- [x] Provide **Keep Practicing** and **End Session** choices.
+- [x] Register a browser unload warning while practice is active.
+- [x] Disable warnings after the session ends.
 
 ## Phase 19: Error Handling
 
 ### 76. Handle Invalid Stored Data
 
-- [ ] Validate each storage category independently at startup.
-- [ ] Recover invalid settings.
-- [ ] Recover invalid sessions.
-- [ ] Recover invalid attempts.
-- [ ] Recover invalid mistake patterns.
-- [ ] Recover invalid active-session data.
-- [ ] Reset only the affected category.
-- [ ] Show a friendly recovery warning.
+- [x] Validate each storage category independently at startup.
+- [x] Recover invalid settings.
+- [x] Recover invalid sessions.
+- [x] Recover invalid attempts.
+- [x] Recover invalid mistake patterns.
+- [x] Recover invalid active-session data.
+- [x] Reset only the affected category.
+- [x] Show a friendly recovery warning.
 
 ### 77. Handle Question-Generation Failures
 
-- [ ] Validate every generated result.
-- [ ] Retry failed generation.
-- [ ] Limit retries.
-- [ ] Provide known-good fallback questions.
-- [ ] Log useful development diagnostics without exposing them to users.
+- [x] Validate every generated result.
+- [x] Retry failed generation.
+- [x] Limit retries.
+- [x] Provide known-good fallback questions.
+- [x] Log useful development diagnostics without exposing them to users.
 
 ### 78. Add User-Friendly Error Messages
 
-- [ ] Add a reusable error panel.
-- [ ] Handle missing session state.
-- [ ] Handle missing summary state.
-- [ ] Handle unavailable mistake review.
-- [ ] Avoid stack traces in user-facing messages.
-- [ ] Always provide a safe path back to Practice Setup or Home.
+- [x] Add a reusable error panel.
+- [x] Handle missing session state.
+- [x] Handle missing summary state.
+- [x] Handle unavailable mistake review.
+- [x] Avoid stack traces in user-facing messages.
+- [x] Always provide a safe path back to Practice Setup or Home.
 
 ## Phase 20: Testing
 
@@ -628,7 +628,7 @@
 - [x] Test mistake pattern behavior.
 - [x] Test similar-question generation.
 - [x] Test mastery rules.
-- [ ] Test storage serialization and validation.
+- [x] Test storage serialization and validation.
 
 ### 80. Complete Component Tests
 
@@ -650,7 +650,7 @@
 - [x] Test an incorrect answer creating a mistake pattern.
 - [x] Test mistake-review generation.
 - [x] Test mastery completion.
-- [ ] Test persistence after a browser refresh.
+- [x] Test persistence after a browser refresh.
 - [x] Test resetting statistics.
 
 ### 82. Complete Accessibility Testing

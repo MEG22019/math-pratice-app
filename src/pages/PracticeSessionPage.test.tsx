@@ -6,7 +6,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AppRoutes } from '../components/App'
 import {
   defaultSettings,
+  loadActiveSession,
   loadMistakePatterns,
+  loadSessions,
   saveMistakePatterns,
   saveSettings,
 } from '../services/storage'
@@ -14,6 +16,7 @@ import type { MistakePattern, PracticeSetupConfiguration } from '../types'
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 function renderSession(configuration: PracticeSetupConfiguration) {
@@ -201,6 +204,98 @@ describe('PracticeSessionPage', () => {
     expect(
       screen.getAllByText(selectedAnswer, { selector: 'strong' }).length,
     ).toBeGreaterThanOrEqual(1)
+  })
+
+  it('protects application navigation and stops warning after ending', async () => {
+    const user = userEvent.setup()
+    renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 5,
+      mode: 'regular',
+    })
+
+    const unloadWhileActive = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(unloadWhileActive)
+    expect(unloadWhileActive.defaultPrevented).toBe(true)
+
+    await user.click(screen.getByRole('link', { name: 'Home' }))
+    expect(
+      screen.getByRole('heading', { name: 'Leave this practice session?' }),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Keep Practicing' }))
+    expect(
+      screen.getByRole('heading', { name: 'Question 1 of 5' }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('link', { name: 'Home' }))
+    await user.click(screen.getByRole('button', { name: 'End Session' }))
+
+    expect(
+      screen.getByRole('heading', { name: /math feels better/i }),
+    ).toBeInTheDocument()
+    expect(loadActiveSession()).toBeUndefined()
+    expect(loadSessions()[0].completedAt).toBeDefined()
+    const unloadAfterEnding = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(unloadAfterEnding)
+    expect(unloadAfterEnding.defaultPrevented).toBe(false)
+  })
+
+  it('shows a friendly storage error without interrupting practice', async () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('Storage full', 'QuotaExceededError')
+    })
+
+    renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 5,
+      mode: 'regular',
+    })
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Progress could not be saved',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Question 1 of 5' }),
+    ).toBeInTheDocument()
+  })
+
+  it('rejects invalid route configuration with safe next steps', () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: '/practice/session',
+            state: {
+              configuration: {
+                operations: [],
+                difficulty: 99,
+                sessionLength: 5,
+                mode: 'regular',
+              },
+            },
+          },
+        ]}
+      >
+        <AppRoutes />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'That practice setup is not valid',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'Go to Practice Setup' }),
+    ).toHaveAttribute('href', '/practice/setup')
+    expect(screen.getByRole('link', { name: 'Return Home' })).toHaveAttribute(
+      'href',
+      '/',
+    )
   })
 
   it('applies animation, explanation, and feedback preferences', async () => {

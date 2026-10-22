@@ -6,12 +6,21 @@ import { PracticeSetupPage } from '../pages/PracticeSetupPage'
 import { SessionSummaryPage } from '../pages/SessionSummaryPage'
 import { SettingsPage } from '../pages/SettingsPage'
 import { StatisticsPage } from '../pages/StatisticsPage'
+import type { StorageInitializationReport } from '../services/storage'
 import { AppShell } from './layout/AppShell'
 
-export function AppRoutes() {
+interface AppProps {
+  storageInitializationReport?: StorageInitializationReport
+}
+
+export function AppRoutes({ storageInitializationReport }: AppProps = {}) {
   return (
     <Routes>
-      <Route element={<AppShell />}>
+      <Route
+        element={
+          <AppShell storageInitializationReport={storageInitializationReport} />
+        }
+      >
         <Route index element={<HomePage />} />
         <Route path="practice/setup" element={<PracticeSetupPage />} />
         <Route path="practice/session" element={<PracticeSessionPage />} />
@@ -24,10 +33,10 @@ export function AppRoutes() {
   )
 }
 
-export function App() {
+export function App({ storageInitializationReport }: AppProps) {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AppRoutes storageInitializationReport={storageInitializationReport} />
     </BrowserRouter>
   )
 }

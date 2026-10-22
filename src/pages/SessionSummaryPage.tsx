@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import { PageContainer } from '../components/layout/PageContainer'
 import { Button, ButtonLink } from '../components/ui/Button'
+import { ErrorPanel } from '../components/ui/ErrorPanel'
 import {
   createMistakeReviewConfiguration,
   getActiveMistakePatterns,
@@ -12,11 +13,14 @@ import {
   loadMistakePatterns,
   loadSession,
   loadSettings,
+  isPracticeSession,
 } from '../services/storage'
-import type { PracticeSetupConfiguration } from '../types'
+import type { PracticeSession, PracticeSetupConfiguration } from '../types'
 
 interface SummaryLocationState {
+  session?: PracticeSession
   sessionId?: string
+  storageError?: boolean
 }
 
 const operationLabels = {
@@ -36,8 +40,12 @@ const difficultyLabels = {
 export function SessionSummaryPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const summaryState = (location.state ?? {}) as SummaryLocationState
   const [session] = useState(() => {
-    const { sessionId } = (location.state ?? {}) as SummaryLocationState
+    const { session: stateSession, sessionId } = summaryState
+    if (isPracticeSession(stateSession) && stateSession.completedAt) {
+      return stateSession
+    }
     const resolvedSessionId = sessionId ?? loadLastSummarySessionId()
     return resolvedSessionId ? loadSession(resolvedSessionId) : undefined
   })
@@ -51,15 +59,19 @@ export function SessionSummaryPage() {
   if (!session) {
     return (
       <PageContainer className="placeholder-page">
-        <section className="placeholder-card">
-          <div className="placeholder-card__symbol" aria-hidden="true">
-            🧭
-          </div>
-          <p className="eyebrow">Nothing to show yet</p>
-          <h1>Session summary unavailable</h1>
-          <p>Finish a practice session to see your results here.</p>
-          <ButtonLink to="/practice/setup">Start Practice</ButtonLink>
-        </section>
+        <ErrorPanel
+          headingLevel={1}
+          title="Session summary unavailable"
+          message="We could not find those session results. Start a new practice session or return home—you did not do anything wrong."
+          actions={
+            <>
+              <ButtonLink to="/practice/setup">Start Practice</ButtonLink>
+              <ButtonLink to="/" variant="secondary">
+                Return Home
+              </ButtonLink>
+            </>
+          }
+        />
       </PageContainer>
     )
   }
@@ -108,6 +120,13 @@ export function SessionSummaryPage() {
 
   return (
     <PageContainer className="session-summary-page">
+      {summaryState.storageError && (
+        <ErrorPanel
+          compact
+          title="This result could not be saved"
+          message="Your summary is ready, but browser storage was unavailable. These results may disappear when you leave or refresh this page."
+        />
+      )}
       <section className="session-summary-card" aria-labelledby="summary-title">
         <div className="session-complete-card__icon" aria-hidden="true">
           🏆

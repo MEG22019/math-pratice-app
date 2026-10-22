@@ -538,6 +538,105 @@ main {
   line-height: 1.6;
 }
 
+.app-notice {
+  width: min(calc(100% - 2rem), var(--page-max));
+  margin: 1rem auto 0;
+}
+
+.error-panel {
+  display: flex;
+  width: min(100%, 42rem);
+  align-items: flex-start;
+  gap: 1rem;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  border: 0.15rem solid #e7ba45;
+  border-radius: 1.5rem;
+  background: #fffaf0;
+  box-shadow: var(--shadow);
+  color: var(--navy);
+}
+
+.error-panel--compact {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.35rem 1rem rgb(24 49 83 / 8%);
+}
+
+.error-panel__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.error-panel__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.error-panel h1,
+.error-panel h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 4vw, 2rem);
+}
+
+.error-panel p {
+  margin: 0.45rem 0 0;
+  color: #5c6875;
+  line-height: 1.55;
+}
+
+.error-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.error-panel--compact .error-panel__actions {
+  margin-top: 0.65rem;
+}
+
+.dialog-backdrop {
+  display: grid;
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(24 49 83 / 58%);
+}
+
+.leave-session-dialog {
+  width: min(100%, 31rem);
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  border: 0.18rem solid #b9e6fa;
+  border-radius: 2rem;
+  background: var(--white);
+  box-shadow: 0 1.5rem 4rem rgb(10 27 50 / 28%);
+  text-align: center;
+}
+
+.leave-session-dialog > span {
+  font-size: 3rem;
+}
+
+.leave-session-dialog h2 {
+  margin: 0.5rem 0 0;
+  font-size: clamp(1.6rem, 5vw, 2.25rem);
+}
+
+.leave-session-dialog p {
+  margin: 0.75rem 0 1.5rem;
+  color: #5b6f84;
+  line-height: 1.55;
+}
+
+.leave-session-dialog > div {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
 .setup-page {
   padding-block: clamp(2.5rem, 6vw, 5rem);
 }
@@ -1960,6 +2059,21 @@ main {
 
   .placeholder-page {
     min-height: calc(100vh - 14rem);
+  }
+
+  .leave-session-dialog > div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .error-panel:not(.error-panel--compact) {
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .error-panel:not(.error-panel--compact) .error-panel__actions {
+    justify-content: center;
   }
 }
 
