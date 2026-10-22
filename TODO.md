@@ -248,62 +248,62 @@
 - [x] Detect when a fixed-length session reaches its target.
 - [x] Stop generating questions after completion.
 - [x] Save completion time.
-- [ ] Navigate to the summary page.
+- [x] Navigate to the summary page.
 
 ### 33. Build the Session Summary Page
 
-- [ ] Display attempted questions.
-- [ ] Display correct answers.
-- [ ] Display incorrect answers.
-- [ ] Display accuracy.
-- [ ] Display session configuration/details.
-- [ ] Display mistake-review question count when applicable.
+- [x] Display attempted questions.
+- [x] Display correct answers.
+- [x] Display incorrect answers.
+- [x] Display accuracy.
+- [x] Display session configuration/details.
+- [x] Display mistake-review question count when applicable.
 
 ### 34. Add Summary Actions
 
-- [ ] Add **Practice Again**.
-- [ ] Add **Practice Mistakes**.
-- [ ] Add **Change Settings**.
-- [ ] Add **View Statistics**.
-- [ ] Add **Return Home**.
-- [ ] Disable Practice Mistakes when no mistakes are available.
+- [x] Add **Practice Again**.
+- [x] Add **Practice Mistakes**.
+- [x] Add **Change Settings**.
+- [x] Add **View Statistics**.
+- [x] Add **Return Home**.
+- [x] Disable Practice Mistakes when no mistakes are available.
 
 ## Phase 9: Local Data Persistence
 
 ### 35. Create the Storage Layer
 
-- [ ] Create safe localStorage read/write helpers.
-- [ ] Handle JSON parse errors.
-- [ ] Handle unavailable localStorage.
-- [ ] Handle storage quota errors.
-- [ ] Define storage keys.
+- [x] Create safe localStorage read/write helpers.
+- [x] Handle JSON parse errors.
+- [x] Handle unavailable localStorage.
+- [x] Handle storage quota errors.
+- [x] Define storage keys.
 
 ### 36. Validate Stored Data
 
-- [ ] Validate settings.
-- [ ] Validate sessions.
-- [ ] Validate attempts.
-- [ ] Sanitize invalid values.
-- [ ] Fall back to safe defaults.
+- [x] Validate settings.
+- [x] Validate sessions.
+- [x] Validate attempts.
+- [x] Sanitize invalid values.
+- [x] Fall back to safe defaults.
 
 ### 37. Add Storage Versioning
 
-- [ ] Add a schema/storage version.
-- [ ] Add a migration mechanism.
-- [ ] Preserve unrelated valid data during migration.
+- [x] Add a schema/storage version.
+- [x] Add a migration mechanism.
+- [x] Preserve unrelated valid data during migration.
 
 ### 38. Persist Settings and History
 
-- [ ] Save settings.
-- [ ] Save attempts.
-- [ ] Save completed sessions.
-- [ ] Reload stored data at application startup.
+- [x] Save settings.
+- [x] Save attempts.
+- [x] Save completed sessions.
+- [x] Reload stored data at application startup.
 
 ### 39. Add Storage Limits
 
-- [ ] Limit raw stored sessions.
-- [ ] Limit raw stored attempts.
-- [ ] Verify persistence after refresh/restart.
+- [x] Limit raw stored sessions.
+- [x] Limit raw stored attempts.
+- [x] Verify persistence after refresh/restart.
 
 ## Phase 10: Statistics
 
@@ -572,12 +572,12 @@
 
 ### 74. Persist an Active Session
 
-- [ ] Save the active session.
-- [ ] Save the current question.
-- [ ] Save attempts.
-- [ ] Save selected answer and card state.
-- [ ] Restore an active session after refresh.
-- [ ] Clear the active-session snapshot after completion.
+- [x] Save the active session.
+- [x] Save the current question.
+- [x] Save attempts.
+- [x] Save selected answer and card state.
+- [x] Restore an active session after refresh.
+- [x] Clear the active-session snapshot after completion.
 
 ### 75. Protect Against Accidental Navigation
 

@@ -5,19 +5,32 @@ import { Button } from '../ui/Button'
 
 interface QuestionCardProps {
   animationsEnabled?: boolean
+  initialIsRevealed?: boolean
+  initialSelectedAnswer?: number | null
   onResult: (isCorrect: boolean, selectedAnswer: number) => void
+  onStateChange?: (state: QuestionCardState) => void
   question: Question
   showExplanation?: boolean
 }
 
+export interface QuestionCardState {
+  isRevealed: boolean
+  selectedAnswer: number | null
+}
+
 export function QuestionCard({
   animationsEnabled = true,
+  initialIsRevealed = false,
+  initialSelectedAnswer = null,
   onResult,
+  onStateChange,
   question,
   showExplanation = false,
 }: QuestionCardProps) {
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [isRevealed, setIsRevealed] = useState(false)
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(
+    initialSelectedAnswer,
+  )
+  const [isRevealed, setIsRevealed] = useState(initialIsRevealed)
   const [hasSubmitted, setHasSubmitted] = useState(false)
 
   function submitResult(isCorrect: boolean) {
@@ -54,7 +67,10 @@ export function QuestionCard({
                 className={`answer-choice${selectedAnswer === choice ? ' answer-choice--selected' : ''}`}
                 key={choice}
                 type="button"
-                onClick={() => setSelectedAnswer(choice)}
+                onClick={() => {
+                  setSelectedAnswer(choice)
+                  onStateChange?.({ selectedAnswer: choice, isRevealed: false })
+                }}
               >
                 <span className="answer-choice__key" aria-hidden="true">
                   {index + 1}
@@ -71,7 +87,10 @@ export function QuestionCard({
             className="question-card__reveal"
             disabled={selectedAnswer === null}
             type="button"
-            onClick={() => setIsRevealed(true)}
+            onClick={() => {
+              setIsRevealed(true)
+              onStateChange?.({ selectedAnswer, isRevealed: true })
+            }}
           >
             Check My Answer
           </Button>

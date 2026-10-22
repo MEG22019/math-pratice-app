@@ -6,6 +6,7 @@ import { OperationSelector } from '../components/practice/OperationSelector'
 import { SessionLengthSelector } from '../components/practice/SessionLengthSelector'
 import { Button } from '../components/ui/Button'
 import { PageContainer } from '../components/layout/PageContainer'
+import { loadSettings, saveSettings } from '../services/storage'
 import type {
   DifficultyLevel,
   MathOperation,
@@ -15,9 +16,16 @@ import type {
 
 export function PracticeSetupPage() {
   const navigate = useNavigate()
-  const [operations, setOperations] = useState<MathOperation[]>(['addition'])
-  const [difficulty, setDifficulty] = useState<DifficultyLevel>(1)
-  const [sessionLength, setSessionLength] = useState<SessionLength>(10)
+  const [settings] = useState(loadSettings)
+  const [operations, setOperations] = useState<MathOperation[]>(() => [
+    ...settings.defaultOperations,
+  ])
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>(
+    settings.defaultDifficulty,
+  )
+  const [sessionLength, setSessionLength] = useState<SessionLength>(
+    settings.defaultSessionLength,
+  )
   const hasOperation = operations.length > 0
 
   function startSession(event: FormEvent<HTMLFormElement>) {
@@ -34,6 +42,12 @@ export function PracticeSetupPage() {
       mode: 'regular',
     }
 
+    saveSettings({
+      ...settings,
+      defaultOperations: operations,
+      defaultDifficulty: difficulty,
+      defaultSessionLength: sessionLength,
+    })
     navigate('/practice/session', { state: { configuration } })
   }
 
@@ -69,7 +83,7 @@ export function PracticeSetupPage() {
           <Button disabled={!hasOperation} type="submit">
             Start Session <span aria-hidden="true">→</span>
           </Button>
-          <p>Your choices only apply to this practice session.</p>
+          <p>We’ll remember these choices for your next practice session.</p>
         </div>
       </form>
     </PageContainer>

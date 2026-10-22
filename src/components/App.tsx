@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { HomePage } from '../pages/HomePage'
 import { PracticeSessionPage } from '../pages/PracticeSessionPage'
 import { PracticeSetupPage } from '../pages/PracticeSetupPage'
+import { SessionSummaryPage } from '../pages/SessionSummaryPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
 import { AppShell } from './layout/AppShell'
 
@@ -13,17 +14,7 @@ export function AppRoutes() {
         <Route index element={<HomePage />} />
         <Route path="practice/setup" element={<PracticeSetupPage />} />
         <Route path="practice/session" element={<PracticeSessionPage />} />
-        <Route
-          path="practice/summary"
-          element={
-            <PlaceholderPage
-              eyebrow="Great effort"
-              title="Session Summary"
-              description="After a practice session, this page will celebrate your progress and show your results."
-              symbol="🏆"
-            />
-          }
-        />
+        <Route path="practice/summary" element={<SessionSummaryPage />} />
         <Route
           path="statistics"
           element={

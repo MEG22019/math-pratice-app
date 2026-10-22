@@ -1121,15 +1121,21 @@ main {
   gap: 0.85rem;
 }
 
-.session-complete-page {
+.session-summary-page,
+.session-transition {
   display: grid;
   min-height: calc(100vh - 10rem);
   place-items: center;
   padding-block: 3rem;
 }
 
-.session-complete-card {
-  width: min(100%, 42rem);
+.session-transition {
+  color: #607589;
+  font-weight: 700;
+}
+
+.session-summary-card {
+  width: min(100%, 52rem);
   padding: clamp(2rem, 6vw, 3.5rem);
   border: 0.18rem solid #b9e6fa;
   border-radius: 2.5rem;
@@ -1150,12 +1156,12 @@ main {
   transform: rotate(-4deg);
 }
 
-.session-complete-card h1 {
+.session-summary-card h1 {
   margin: 0;
   font-size: clamp(2.75rem, 7vw, 4.5rem);
 }
 
-.session-complete-card > p:not(.eyebrow) {
+.session-summary-card__message {
   margin: 0.75rem 0 1.5rem;
   color: #607589;
   font-size: 1.1rem;
@@ -1165,7 +1171,7 @@ main {
   display: grid;
   gap: 0.75rem;
   margin: 0 0 1.75rem;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .session-results div {
@@ -1188,6 +1194,63 @@ main {
   font-family: ui-rounded, 'Arial Rounded MT Bold', system-ui, sans-serif;
   font-size: 1.65rem;
   font-weight: 700;
+}
+
+.summary-details {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1.75rem;
+  text-align: left;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.summary-details div {
+  padding: 0.9rem 1rem;
+  border: 0.1rem solid var(--line);
+  border-radius: 1rem;
+}
+
+.summary-details dt {
+  color: #607589;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.summary-details dd {
+  margin: 0.25rem 0 0;
+  font-weight: 700;
+}
+
+.summary-actions {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.summary-actions > .button {
+  justify-self: center;
+  min-width: min(100%, 15rem);
+}
+
+.summary-actions__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.summary-actions__grid .button:disabled {
+  border-color: #c7d1d9;
+  background: #e5e9ed;
+  box-shadow: 0 0.25rem 0 #c7d1d9;
+  color: #687887;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.summary-actions > p {
+  margin: 0;
+  color: #687d90;
+  font-size: 0.9rem;
 }
 
 .site-footer {
@@ -1235,6 +1298,10 @@ main {
 
   .session-header {
     align-items: flex-start;
+  }
+
+  .session-results {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -1347,6 +1414,11 @@ main {
   }
 
   .session-results {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-details,
+  .summary-actions__grid {
     grid-template-columns: 1fr;
   }
 

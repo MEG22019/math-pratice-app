@@ -21,6 +21,14 @@ function renderSession(configuration: PracticeSetupConfiguration) {
   )
 }
 
+function renderSessionRoute() {
+  return render(
+    <MemoryRouter initialEntries={['/practice/session']}>
+      <AppRoutes />
+    </MemoryRouter>,
+  )
+}
+
 describe('PracticeSessionPage', () => {
   it('runs a complete fixed-length practice session', async () => {
     const user = userEvent.setup()
@@ -43,11 +51,9 @@ describe('PracticeSessionPage', () => {
     }
 
     expect(
-      screen.getByRole('heading', { name: 'Great work!' }),
+      await screen.findByRole('heading', { name: 'Session Summary' }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText('You finished all 5 questions.'),
-    ).toBeInTheDocument()
+    expect(screen.getAllByText('5', { selector: 'dd' })).toHaveLength(2)
     expect(screen.getByText('100%')).toBeInTheDocument()
   })
 
@@ -72,8 +78,37 @@ describe('PracticeSessionPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'End Session' }))
     expect(
-      screen.getByRole('heading', { name: 'Great work!' }),
+      await screen.findByRole('heading', { name: 'Session Summary' }),
     ).toBeInTheDocument()
-    expect(screen.getByText('You ended after 1 question.')).toBeInTheDocument()
+    expect(screen.getByText('0%')).toBeInTheDocument()
+  })
+
+  it('restores the active question and revealed card after a refresh', async () => {
+    const user = userEvent.setup()
+    const rendered = renderSession({
+      operations: ['addition'],
+      difficulty: 1,
+      sessionLength: 'continuous',
+      mode: 'regular',
+    })
+
+    const selectedChoice = screen.getAllByRole('button', {
+      name: /^Answer /,
+    })[0]
+    const selectedAnswer = selectedChoice
+      .getAttribute('aria-label')!
+      .replace('Answer ', '')
+    await user.click(selectedChoice)
+    await user.click(screen.getByRole('button', { name: 'Check My Answer' }))
+    expect(screen.getByText('Correct answer')).toBeInTheDocument()
+
+    rendered.unmount()
+    renderSessionRoute()
+
+    expect(screen.getByRole('heading', { name: / = / })).toBeInTheDocument()
+    expect(screen.getByText('Correct answer')).toBeInTheDocument()
+    expect(
+      screen.getAllByText(selectedAnswer, { selector: 'strong' }).length,
+    ).toBeGreaterThanOrEqual(1)
   })
 })

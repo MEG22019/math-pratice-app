@@ -59,6 +59,13 @@ export interface PracticeSession {
   attempts: PracticeAttempt[]
 }
 
+export interface ActiveSessionSnapshot {
+  session: PracticeSession
+  currentQuestion: Question
+  selectedAnswer: number | null
+  isRevealed: boolean
+}
+
 export interface MistakePattern {
   id: string
   operation: MathOperation

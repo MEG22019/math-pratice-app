@@ -1,15 +1,26 @@
-import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { PageContainer } from '../components/layout/PageContainer'
 import { QuestionCard } from '../components/practice/QuestionCard'
+import type { QuestionCardState } from '../components/practice/QuestionCard'
 import { Button, ButtonLink } from '../components/ui/Button'
 import {
   createPracticeSessionState,
   endPracticeSession,
   recordPracticeResult,
 } from '../features/practice/session'
-import type { PracticeSetupConfiguration } from '../types'
+import {
+  clearActiveSession,
+  loadActiveSession,
+  loadSettings,
+  saveActiveSession,
+  saveCompletedSession,
+} from '../services/storage'
+import type {
+  ActiveSessionSnapshot,
+  PracticeSetupConfiguration,
+} from '../types'
 
 interface PracticeSessionLocationState {
   configuration?: PracticeSetupConfiguration
@@ -30,13 +41,29 @@ const difficultyLabels = {
 }
 
 interface ActivePracticeSessionProps {
-  configuration: PracticeSetupConfiguration
+  configuration?: PracticeSetupConfiguration
+  restoredSnapshot?: ActiveSessionSnapshot
 }
 
-function ActivePracticeSession({ configuration }: ActivePracticeSessionProps) {
+function ActivePracticeSession({
+  configuration,
+  restoredSnapshot,
+}: ActivePracticeSessionProps) {
+  const navigate = useNavigate()
+  const [settings] = useState(loadSettings)
   const [state, setState] = useState(() =>
-    createPracticeSessionState(configuration),
+    restoredSnapshot
+      ? {
+          session: restoredSnapshot.session,
+          currentQuestion: restoredSnapshot.currentQuestion,
+          isComplete: false,
+        }
+      : createPracticeSessionState(configuration!),
   )
+  const [cardState, setCardState] = useState<QuestionCardState>(() => ({
+    selectedAnswer: restoredSnapshot?.selectedAnswer ?? null,
+    isRevealed: restoredSnapshot?.isRevealed ?? false,
+  }))
   const { currentQuestion, isComplete, session } = state
   const isContinuous = session.sessionLength === 'continuous'
   const progressMaximum = isContinuous ? undefined : session.sessionLength
@@ -46,47 +73,35 @@ function ActivePracticeSession({ configuration }: ActivePracticeSessionProps) {
     .join(', ')
 
   function recordResult(isCorrect: boolean, selectedAnswer: number) {
+    setCardState({ selectedAnswer: null, isRevealed: false })
     setState((currentState) =>
       recordPracticeResult(currentState, selectedAnswer, isCorrect),
     )
   }
 
-  if (isComplete) {
-    const accuracy =
-      session.attemptedCount === 0
-        ? 0
-        : Math.round((session.correctCount / session.attemptedCount) * 100)
-    const questionLabel =
-      session.attemptedCount === 1 ? 'question' : 'questions'
-    const completionMessage = isContinuous
-      ? `You ended after ${session.attemptedCount} ${questionLabel}.`
-      : `You finished all ${session.attemptedCount} ${questionLabel}.`
+  useEffect(() => {
+    if (isComplete) {
+      saveCompletedSession(session)
+      clearActiveSession()
+      navigate('/practice/summary', {
+        replace: true,
+        state: { sessionId: session.id },
+      })
+      return
+    }
 
+    saveActiveSession({
+      session,
+      currentQuestion,
+      selectedAnswer: cardState.selectedAnswer,
+      isRevealed: cardState.isRevealed,
+    })
+  }, [cardState, currentQuestion, isComplete, navigate, session])
+
+  if (isComplete) {
     return (
-      <PageContainer className="session-complete-page">
-        <section className="session-complete-card" aria-live="polite">
-          <div className="session-complete-card__icon" aria-hidden="true">
-            🎉
-          </div>
-          <p className="eyebrow">Practice complete</p>
-          <h1>Great work!</h1>
-          <p>{completionMessage}</p>
-          <dl className="session-results">
-            <div>
-              <dt>Right</dt>
-              <dd>{session.correctCount}</dd>
-            </div>
-            <div>
-              <dt>Wrong</dt>
-              <dd>{session.incorrectCount}</dd>
-            </div>
-            <div>
-              <dt>Accuracy</dt>
-              <dd>{accuracy}%</dd>
-            </div>
-          </dl>
-          <ButtonLink to="/practice/setup">Choose New Practice</ButtonLink>
-        </section>
+      <PageContainer className="session-transition" aria-live="polite">
+        <p>Preparing your session summary…</p>
       </PageContainer>
     )
   }
@@ -149,9 +164,14 @@ function ActivePracticeSession({ configuration }: ActivePracticeSessionProps) {
       </div>
 
       <QuestionCard
+        animationsEnabled={settings.cardAnimationEnabled}
+        initialIsRevealed={cardState.isRevealed}
+        initialSelectedAnswer={cardState.selectedAnswer}
         key={currentQuestion.id}
         question={currentQuestion}
+        showExplanation={settings.showExplanations}
         onResult={recordResult}
+        onStateChange={setCardState}
       />
     </PageContainer>
   )
@@ -161,8 +181,11 @@ export function PracticeSessionPage() {
   const location = useLocation()
   const { configuration } = (location.state ??
     {}) as PracticeSessionLocationState
+  const [restoredSnapshot] = useState(() =>
+    configuration ? undefined : loadActiveSession(),
+  )
 
-  if (!configuration) {
+  if (!configuration && !restoredSnapshot) {
     return (
       <PageContainer className="placeholder-page">
         <section className="placeholder-card">
@@ -178,5 +201,10 @@ export function PracticeSessionPage() {
     )
   }
 
-  return <ActivePracticeSession configuration={configuration} />
+  return (
+    <ActivePracticeSession
+      configuration={configuration}
+      restoredSnapshot={restoredSnapshot}
+    />
+  )
 }

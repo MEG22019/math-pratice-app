@@ -4,6 +4,11 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
 import { AppRoutes } from '../components/App'
+import {
+  defaultSettings,
+  loadSettings,
+  saveSettings,
+} from '../services/storage'
 
 function renderSetup() {
   return render(
@@ -78,5 +83,29 @@ describe('Practice Setup', () => {
         'Addition, Multiplication · Advanced · Continuous practice',
       ),
     ).toBeInTheDocument()
+
+    expect(loadSettings()).toMatchObject({
+      defaultOperations: ['addition', 'multiplication'],
+      defaultDifficulty: 4,
+      defaultSessionLength: 'continuous',
+    })
+  })
+
+  it('loads persisted practice defaults without overwriting them', () => {
+    saveSettings({
+      ...defaultSettings,
+      defaultOperations: ['division'],
+      defaultDifficulty: 4,
+      defaultSessionLength: 20,
+    })
+
+    renderSetup()
+
+    expect(screen.getByRole('checkbox', { name: 'Division' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Addition' })).not.toBeChecked()
+    expect(screen.getByRole('radio', { name: /Advanced/i })).toBeChecked()
+    expect(
+      screen.getByRole('radio', { name: /20.*Power practice/i }),
+    ).toBeChecked()
   })
 })

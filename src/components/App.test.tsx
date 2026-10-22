@@ -47,7 +47,7 @@ describe('App navigation', () => {
   it('provides all required application routes', () => {
     const routes = [
       ['/practice/session', 'No practice setup found'],
-      ['/practice/summary', 'Session Summary'],
+      ['/practice/summary', 'Session summary unavailable'],
       ['/statistics', 'Statistics'],
       ['/settings', 'Settings'],
     ]
