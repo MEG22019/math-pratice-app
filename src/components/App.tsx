@@ -2,6 +2,7 @@ import { lazy, Suspense, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { HomePage } from '../pages/HomePage'
+import { PrivacyPage } from '../pages/PrivacyPage'
 import { PracticeSessionPage } from '../pages/PracticeSessionPage'
 import { PracticeSetupPage } from '../pages/PracticeSetupPage'
 import { SessionSummaryPage } from '../pages/SessionSummaryPage'
@@ -66,6 +67,7 @@ export function AppRoutes({ storageInitializationReport }: AppProps = {}) {
             </LazyPage>
           }
         />
+        <Route path="privacy" element={<PrivacyPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

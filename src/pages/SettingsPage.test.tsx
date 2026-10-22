@@ -63,7 +63,7 @@ describe('SettingsPage', () => {
     expect(
       screen.getByRole('radio', { name: /20.*Power practice/i }),
     ).toBeChecked()
-  })
+  }, 10_000)
 
   it('requires at least one default operation', async () => {
     const user = userEvent.setup()

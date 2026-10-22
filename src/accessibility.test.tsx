@@ -11,6 +11,7 @@ describe('application accessibility', () => {
     ['Practice Setup', '/practice/setup'],
     ['Statistics', '/statistics'],
     ['Settings', '/settings'],
+    ['Your privacy matters', '/privacy'],
   ])('has no automated accessibility violations on %s', async (_name, path) => {
     const { container } = render(
       <MemoryRouter initialEntries={[path]}>

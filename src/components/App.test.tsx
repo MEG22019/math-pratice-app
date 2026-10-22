@@ -56,6 +56,7 @@ describe('App navigation', () => {
       ['/practice/summary', 'Session summary unavailable'],
       ['/statistics', 'Statistics'],
       ['/settings', 'Settings'],
+      ['/privacy', 'Your privacy matters'],
     ]
 
     for (const [route, heading] of routes) {

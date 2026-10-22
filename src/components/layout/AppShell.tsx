@@ -31,8 +31,10 @@ export function AppShell({ storageInitializationReport }: AppShellProps) {
   )
   const routeName = location.pathname.startsWith('/practice/')
     ? 'Practice'
-    : (navigationItems.find((item) => item.to === location.pathname)?.label ??
-      'Math Practice')
+    : location.pathname === '/privacy'
+      ? 'Privacy'
+      : (navigationItems.find((item) => item.to === location.pathname)?.label ??
+        'Math Practice')
 
   useEffect(() => {
     if (previousPath.current !== location.pathname) {
@@ -111,6 +113,7 @@ export function AppShell({ storageInitializationReport }: AppShellProps) {
 
       <footer className="site-footer">
         <p>Keep trying, keep growing, and have fun with math!</p>
+        <NavLink to="/privacy">Privacy</NavLink>
       </footer>
     </div>
   )

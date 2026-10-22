@@ -693,62 +693,62 @@
 
 ### 86. Add Privacy Information
 
-- [ ] Explain that no personal information is required.
-- [ ] Explain that practice data stays in browser local storage.
-- [ ] State that the app has no analytics/advertising tracking.
-- [ ] State that the child-facing interface contains no advertisements.
-- [ ] Explain that clearing browser data removes progress.
-- [ ] Add a privacy document/page or Settings section.
+- [x] Explain that no personal information is required.
+- [x] Explain that practice data stays in browser local storage.
+- [x] State that the app has no analytics/advertising tracking.
+- [x] State that the child-facing interface contains no advertisements.
+- [x] Explain that clearing browser data removes progress.
+- [x] Add a privacy document/page or Settings section.
 
 ### 87. Prepare Production Routing
 
-- [ ] Configure SPA route fallback for Netlify.
-- [ ] Verify direct route loads.
-- [ ] Verify refresh on nested routes.
+- [x] Configure SPA route fallback for Netlify.
+- [x] Verify direct route loads.
+- [x] Verify refresh on nested routes.
 
 ### 88. Add Release Verification
 
-- [ ] Add a command that runs formatting checks, lint, tests, and production build.
-- [ ] Verify production preview.
-- [ ] Smoke-test main routes.
-- [ ] Verify local-storage persistence in production mode.
-- [ ] Check the console for runtime errors.
+- [x] Add a command that runs formatting checks, lint, tests, and production build.
+- [x] Verify production preview.
+- [x] Smoke-test main routes.
+- [x] Verify local-storage persistence in production mode.
+- [x] Check the console for runtime errors.
 
 ### 89. Document and Deploy
 
-- [ ] Complete README setup instructions.
-- [ ] Document deployment steps.
-- [ ] Document browser/device testing.
-- [ ] Test Chrome.
+- [x] Complete README setup instructions.
+- [x] Document deployment steps.
+- [x] Document browser/device testing.
+- [x] Test Chrome.
 - [ ] Test Safari.
-- [ ] Test Firefox.
+- [x] Test Firefox.
 - [ ] Test Edge.
-- [ ] Test tablet width.
-- [ ] Test phone width.
+- [x] Test tablet width.
+- [x] Test phone width.
 - [ ] Deploy to Netlify or another public hosting platform.
 - [ ] Verify the public URL works after refresh and navigation.
 
 ## Final Verification
 
-- [ ] All four arithmetic operations work.
-- [ ] Difficulty levels work correctly.
-- [ ] Answer choices are valid and unique.
-- [ ] Practice sessions track results accurately.
-- [ ] Fixed sessions end correctly.
-- [ ] Continuous practice works.
-- [ ] Session summary is accurate.
-- [ ] Mistakes are persisted.
-- [ ] Mistake review works.
-- [ ] Mastery works.
-- [ ] Statistics are accurate.
-- [ ] Settings persist.
-- [ ] Data survives refresh.
-- [ ] Active sessions recover when appropriate.
-- [ ] Accessibility checks pass.
-- [ ] Responsive layout is usable.
-- [ ] `npm run test` passes.
-- [ ] `npm run lint` passes.
-- [ ] Production build succeeds.
-- [ ] README is complete.
+- [x] All four arithmetic operations work.
+- [x] Difficulty levels work correctly.
+- [x] Answer choices are valid and unique.
+- [x] Practice sessions track results accurately.
+- [x] Fixed sessions end correctly.
+- [x] Continuous practice works.
+- [x] Session summary is accurate.
+- [x] Mistakes are persisted.
+- [x] Mistake review works.
+- [x] Mastery works.
+- [x] Statistics are accurate.
+- [x] Settings persist.
+- [x] Data survives refresh.
+- [x] Active sessions recover when appropriate.
+- [x] Accessibility checks pass.
+- [x] Responsive layout is usable.
+- [x] `npm run test` passes.
+- [x] `npm run lint` passes.
+- [x] Production build succeeds.
+- [x] README is complete.
 - [ ] GitHub repository is up to date.
 - [ ] Public deployment works.
